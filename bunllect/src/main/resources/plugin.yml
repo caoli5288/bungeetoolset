@@ -1,0 +1,4 @@
+name: Bunllect
+main: com.mengcraft.bunllect.Main
+version: ${project.version}
+author: caoli5288
