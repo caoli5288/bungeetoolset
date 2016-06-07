@@ -1,0 +1,4 @@
+name: Kick
+main: com.mengcraft.kick.Main
+version: ${project.version}
+author: caoli5288
