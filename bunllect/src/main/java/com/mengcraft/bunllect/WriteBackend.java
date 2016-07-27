@@ -1,47 +1,64 @@
 package com.mengcraft.bunllect;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created on 16-5-30.
  */
 public class WriteBackend implements Runnable {
 
-    private final BlockingQueue<String> queue = new LinkedBlockingQueue<>();
-    private ConnectionFactory factory;
-    private boolean shutdown;
+    private final static String PRE_COMMAND = "INSERT " +
+            "INTO" +
+            " bunllect " +
+            "SET" +
+            " name = ?," +
+            " ip = ?," +
+            " life = ?," +
+            " instance = ?," +
+            " host = ?" +
+            ";";
+
+    private final EntityQueue queue = EntityQueue.QUEUE;
+    private final ConnectionFactory factory;
+    private final Main main;
+
+    public WriteBackend(Main main, ConnectionFactory factory) {
+        this.main = main;
+        this.factory = factory;
+    }
 
     @Override
     public void run() {
-        while (!shutdown) {
-            try {
-                String take = queue.take();
-                Connection connection = factory.getConnection();
-                try (Statement st = connection.createStatement()) {
-                    st.execute(take);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            } catch (InterruptedException | ClassNotFoundException | SQLException e) {
-                e.printStackTrace();
-            }
+        while (!main.shutdown) {
+            processQueue();
         }
     }
 
-    public void addBatch(String j) {
-        queue.offer(j);
+    private void processQueue() {
+        try {
+            Entity taked = queue.take();
+            if (taked.valid()) {
+                processEntity(taked);
+            }
+        } catch (InterruptedException ignore) {
+        }
     }
 
-    public void setShutdown(boolean shutdown) {
-        this.shutdown = shutdown;
-    }
-
-    public void setFactory(ConnectionFactory factory) {
-        this.factory = factory;
+    private void processEntity(Entity entity) {
+        try (Connection conn = factory.getConnection()) {
+            try (PreparedStatement st = conn.prepareStatement(PRE_COMMAND)) {
+                st.setString(1, entity.getName());
+                st.setString(2, entity.getIp());
+                st.setInt(3, entity.getLife());
+                st.setString(4, entity.getInstance());
+                st.setString(5, entity.getHost());
+                st.execute();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 }

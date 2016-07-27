@@ -18,6 +18,9 @@ public class Entity {
         this.host = host;
     }
 
+    public Entity() {
+    }
+
     public String getName() {
         return name;
     }

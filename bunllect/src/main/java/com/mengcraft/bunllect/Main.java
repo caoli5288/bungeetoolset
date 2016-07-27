@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.util.Properties;
 
@@ -14,7 +16,7 @@ import java.util.Properties;
  */
 public class Main extends Plugin {
 
-    private final WriteBackend backend = new WriteBackend();
+    public boolean shutdown;
 
     @Override
     public void onEnable() {
@@ -41,15 +43,22 @@ public class Main extends Plugin {
         factory.setUser(conf.getProperty("bunllect.jdbc.user"));
         factory.setPassword(conf.getProperty("bunllect.jdbc.password"));
 
-        backend.setFactory(factory);
+        WriteBackend backend = new WriteBackend(this, factory);
 
         getProxy().getScheduler().runAsync(this, backend);
-        getProxy().getPluginManager().registerListener(this, new Executor(backend));
+
+        String host;
+        try {
+            host = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException ignore) {
+            host = "";
+        }
+        getProxy().getPluginManager().registerListener(this, new Executor(host));
     }
 
     @Override
     public void onDisable() {
-        backend.setShutdown(true);
-        backend.addBatch("select 1");
+        shutdown = true;// To interrupt blocking.
+        EntityQueue.QUEUE.offer(new Entity());
     }
 }
