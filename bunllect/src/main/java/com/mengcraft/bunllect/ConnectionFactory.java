@@ -16,8 +16,12 @@ public class ConnectionFactory {
 
     private Connection connection;
 
-    public Connection newConnection() throws ClassNotFoundException, SQLException {
-        Class.forName(driver);
+    public Connection newConnection() throws SQLException {
+        try {
+            Class.forName(driver);
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("Not found " + driver, e);
+        }
         return DriverManager.getConnection(url, user, password);
     }
 
@@ -53,7 +57,7 @@ public class ConnectionFactory {
         this.password = password;
     }
 
-    public Connection getConnection() throws SQLException, ClassNotFoundException {
+    public Connection getConnection() throws SQLException {
         if (connection == null || !connection.isValid(1)) {
             connection = newConnection();
         }
