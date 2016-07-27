@@ -1,10 +1,10 @@
 {
   "influx": {
-    "url": "http://10.88.88.1:8086",
+    "url": "http://db.sample.com:8086",
     "userName": "admin",
     "password": "wowsuchpassword",
     "database": "bunflux"
   },
-  "server": "play.i5mc.com",
-  "repeat": 5
+  "server": "main",
+  "repeat": 15
 }
