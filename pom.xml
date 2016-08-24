@@ -13,15 +13,19 @@
 
     <repositories>
         <repository>
-            <id>bungeecord-repo</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>ci-mengcraft</id>
+            <url>http://ci.mengcraft.com:8080/plugin/repository/everything/</url>
+        </repository>
+        <repository>
+            <id>repo-md-5</id>
+            <url>http://repo.md-5.net/content/repositories/public/</url>
         </repository>
     </repositories>
 
     <dependencies>
         <dependency>
-            <groupId>net.md-5</groupId>
-            <artifactId>bungeecord-api</artifactId>
+            <groupId>io.github.waterfallmc</groupId>
+            <artifactId>waterfall-api</artifactId>
             <version>1.10-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
