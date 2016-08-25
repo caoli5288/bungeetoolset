@@ -8,6 +8,7 @@
         <module>kick</module>
         <module>bunllect</module>
         <module>bunflux</module>
+        <module>serverlist</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -25,7 +26,7 @@
     <dependencies>
         <dependency>
             <groupId>io.github.waterfallmc</groupId>
-            <artifactId>waterfall-api</artifactId>
+            <artifactId>waterfall-proxy</artifactId>
             <version>1.10-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
