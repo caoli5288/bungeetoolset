@@ -14,17 +14,14 @@ import java.util.StringTokenizer;
 /**
  * Created on 16-8-25.
  */
-public class ListProcessor {
+public class FileProcessor implements Processor {
 
-    private final Map<String, ServerInfo> map;
-    private final Main main;
+    public static final Processor INSTANCE = new FileProcessor();
 
-    private ListProcessor(Main main, Map<String, ServerInfo> map) {
-        this.main = main;
-        this.map = map;
+    private FileProcessor() {
     }
 
-    private boolean processLine(File file, String line) {
+    private boolean process(Map<String, ServerInfo> map, File file, String line) {
         StringTokenizer it = new StringTokenizer(line);
         try {
             String token = it.nextToken();
@@ -37,40 +34,29 @@ public class ListProcessor {
                         new InetSocketAddress(it.nextToken(), Integer.parseInt(it.nextToken())),
                         "",
                         it.hasMoreTokens() && it.nextToken().equals("restricted")
-                ));
+                ), map);
                 return true;
             }
-            main.getLogger().warning("!!! " + file + " " + line);
+            throw new RuntimeException("unknown token " + token + " in " + file);
         } catch (Exception e) {
-            main.getLogger().warning("!!! " + file + " " + line);
+            e.printStackTrace();
         }
         return false;
     }
 
-    private void add(BungeeServerInfo info) {
+    private void add(BungeeServerInfo info, Map<String, ServerInfo> map) {
         map.put(info.getName(), info);
     }
 
-    private void processFile(File file) {
+    public void process(Map<String, ServerInfo> map, File file) {
         try {
             List<String> list = Files.readAllLines(file.toPath());
             for (String line : list) {
-                processLine(file, line);
+                process(map, file, line);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private void process() {
-        File[] files = Main.DIR.listFiles(j -> j.getName().endsWith(".list"));
-        for (File file : files) {
-            processFile(file);
-        }
-    }
-
-    public static void process(Main main, Map<String, ServerInfo> map) {
-        new ListProcessor(main, map).process();
     }
 
 }

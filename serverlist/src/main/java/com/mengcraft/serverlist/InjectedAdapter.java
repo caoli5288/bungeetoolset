@@ -48,7 +48,7 @@ public class InjectedAdapter implements ConfigurationAdapter {
     @Override
     public Map<String, ServerInfo> getServers() {
         Map<String, ServerInfo> out = proto.getServers();
-        ListProcessor.process(main, out);
+        main.process(out);
         return out;
     }
 

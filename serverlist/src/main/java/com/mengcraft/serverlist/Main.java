@@ -1,5 +1,6 @@
 package com.mengcraft.serverlist;
 
+import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.conf.Configuration;
 
@@ -14,16 +15,17 @@ public class Main extends Plugin {
 
     @Override
     public void onEnable() {
-        if (!DIR.isDirectory()) {
-            if (DIR.mkdir()) {
-                throw new RuntimeException(DIR + " not a directory!");
+        if (!dir.isDirectory()) {
+            if (dir.mkdir()) {
+                throw new RuntimeException(dir + " not a directory!");
             }
         }
+
         try {
             Field field = Configuration.class.getDeclaredField("servers");
             field.setAccessible(true);
             Map map = Map.class.cast(field.get(getProxy().getConfig()));
-            ListProcessor.process(this, map);
+            process(map);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -31,6 +33,23 @@ public class Main extends Plugin {
         getProxy().setConfigurationAdapter(new InjectedAdapter(this));
     }
 
-    public static final File DIR = new File("server.list.d");
+    public void process(Map<String, ServerInfo> map) {
+        String[] list = dir.list();
+        if (list != null) {
+            for (String name : list) {
+                process(map, name);
+            }
+        }
+    }
+
+    private void process(Map<String, ServerInfo> map, String name) {
+        if (name.endsWith(".list")) {
+            FileProcessor.INSTANCE.process(map, new File(dir, name));
+        } else if (name.endsWith(".remote")) {
+            RemoteProcessor.INSTANCE.process(map, new File(dir, name));
+        }
+    }
+
+    public final File dir = new File("server.list.d");
 
 }
