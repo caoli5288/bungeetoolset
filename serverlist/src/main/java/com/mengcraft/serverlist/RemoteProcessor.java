@@ -6,7 +6,6 @@ import net.md_5.bungee.api.config.ServerInfo;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -18,11 +17,15 @@ import java.util.Properties;
 /**
  * Created on 16-8-25.
  */
-public class RemoteProcessor implements Processor {
+public class RemoteProcessor extends Processor {
 
     public static final Processor INSTANCE = new RemoteProcessor();
 
     private RemoteProcessor() {
+    }
+
+    public boolean accept(File f) {
+        return f.getName().endsWith(".remote");
     }
 
     public void process(Map<String, ServerInfo> map, File file) {
@@ -48,19 +51,15 @@ public class RemoteProcessor implements Processor {
         }
     }
 
-    private void process(Map<String, ServerInfo> map, ResultSet query) throws SQLException {
+    private void process(Map<String, ServerInfo> in, ResultSet query) throws SQLException {
         while (query.next()) {
-            add(new BungeeServerInfo(
+            put(in, new BungeeServerInfo(
                     query.getString(1),
-                    new InetSocketAddress(query.getString(2), query.getInt(3)),
+                    toAddress(query.getString(2), query.getInt(3)),
                     "",
                     query.getBoolean(4)
-            ), map);
+            ));
         }
-    }
-
-    private void add(BungeeServerInfo info, Map<String, ServerInfo> map) {
-        map.put(info.getName(), info);
     }
 
 }

@@ -5,7 +5,9 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.conf.Configuration;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
 import java.util.Map;
 
 /**
@@ -15,9 +17,9 @@ public class Main extends Plugin {
 
     @Override
     public void onEnable() {
-        if (!dir.isDirectory()) {
-            if (dir.mkdir()) {
-                throw new RuntimeException(dir + " not a directory!");
+        if (!folder.isDirectory()) {
+            if (folder.mkdir()) {
+                throw new RuntimeException(folder + " not a directory!");
             }
         }
 
@@ -34,22 +36,20 @@ public class Main extends Plugin {
     }
 
     public void process(Map<String, ServerInfo> map) {
-        String[] list = dir.list();
-        if (list != null) {
-            for (String name : list) {
-                process(map, name);
-            }
+        try {
+            Files.walk(folder.toPath(), 1).forEach(path -> {
+                File f = path.toFile();
+                if (FileProcessor.INSTANCE.accept(f)) {
+                    FileProcessor.INSTANCE.process(map, f);
+                } else if (RemoteProcessor.INSTANCE.accept(f)) {
+                    RemoteProcessor.INSTANCE.process(map, f);
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    private void process(Map<String, ServerInfo> map, String name) {
-        if (name.endsWith(".list")) {
-            FileProcessor.INSTANCE.process(map, new File(dir, name));
-        } else if (name.endsWith(".remote")) {
-            RemoteProcessor.INSTANCE.process(map, new File(dir, name));
-        }
-    }
-
-    public final File dir = new File("server.list.d");
+    public final File folder = new File("server.list.d");
 
 }
