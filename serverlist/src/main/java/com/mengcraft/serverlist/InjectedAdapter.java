@@ -1,5 +1,6 @@
 package com.mengcraft.serverlist;
 
+import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.config.ConfigurationAdapter;
 import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -48,7 +49,16 @@ public class InjectedAdapter implements ConfigurationAdapter {
     @Override
     public Map<String, ServerInfo> getServers() {
         Map<String, ServerInfo> out = proto.getServers();
-        main.process(out);
+        if (main.isWaterfall()) {
+            main.process(out);
+        } else {
+            main.newActive(out);
+            main.getProxy().getServers().forEach((name, info) -> {
+                if (!out.containsKey(name)) {
+                    out.put(name, info);
+                }// fix exception on origin proxy
+            });
+        }
         return out;
     }
 

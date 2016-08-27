@@ -36,25 +36,28 @@ public class Main extends Plugin implements Listener {
             }
         }
 
-        process(getNative());// init
+        process(getProxy().getServers());// init
 
         getProxy().setConfigurationAdapter(new InjectedAdapter(this));
         if (!waterfall) getProxy().getPluginManager().registerListener(this, this);
     }
 
-    public void process(Map<String, ServerInfo> map) {
+    public void process(Map<String, ServerInfo> in) {
         try {
             Files.walk(folder.toPath(), 1).forEach(path -> {
                 File f = path.toFile();
                 if (FileProcessor.INSTANCE.accept(f)) {
-                    FileProcessor.INSTANCE.process(map, f);
+                    FileProcessor.INSTANCE.process(in, f);
                 } else if (RemoteProcessor.INSTANCE.accept(f)) {
-                    RemoteProcessor.INSTANCE.process(map, f);
+                    RemoteProcessor.INSTANCE.process(in, f);
                 }
             });
-            if (!waterfall) active = new HashMap<>(map);// save for process
         } catch (IOException ignore) {
         }
+    }
+
+    public Map<String, ServerInfo> newActive(Map<String, ServerInfo> in) {
+        return active = new HashMap<>(in);
     }
 
     private Field field;
@@ -70,19 +73,11 @@ public class Main extends Plugin implements Listener {
         return field;
     }
 
-    @SuppressWarnings("unchecked")
-    public Map<String, ServerInfo> getNative() {
-        try {
-            return (Map) getField().get(getProxy().getConfig());
-        } catch (IllegalAccessException ignore) {
-        }
-        return null;
-    }
-
     @EventHandler
     public void handle(ProxyReloadEvent event) {
         try {// add remove and modify support for bungee
-            getNative().forEach((name, info) -> {
+            process(active);
+            getProxy().getServers().forEach((name, info) -> {
                 if (!active.containsKey(name) || !eq(active.get(name), info)) {
                     removeInfo(info);
                 } else {
@@ -125,6 +120,10 @@ public class Main extends Plugin implements Listener {
             }
         }
         return out;
+    }
+
+    public boolean isWaterfall() {
+        return waterfall;
     }
 
     public final File folder = new File("server.list.d");
