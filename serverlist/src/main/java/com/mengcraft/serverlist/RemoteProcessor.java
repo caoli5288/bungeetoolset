@@ -11,6 +11,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -32,21 +33,34 @@ public class RemoteProcessor extends Processor {
         Properties info = new Properties();
         try {
             info.load(new FileReader(file));
+            info.put(".remote", file.getPath());
             process(map, info);
-        } catch (IOException ignore) {
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    private void process(Map<String, ServerInfo> map, Properties info) {
+    private final Map<String, Map> backup = new HashMap<>(); // Avoid SQLException
+
+    private void process(Map<String, ServerInfo> map, Properties info) throws IOException {
         try {
             Class.forName(info.getProperty("driver"));
             try (Connection conn = DriverManager.getConnection(info.getProperty("url"), info);
                  Statement stat = conn.createStatement();
                  ResultSet query = stat.executeQuery("select name,host,port,restricted from " + info.getProperty("table"))
             ) {
-                process(map, query);
+                Map j = new HashMap();
+                process(j, query);
+                map.putAll(j);
+                backup.put(info.getProperty(".remote"), j);
             }
         } catch (ClassNotFoundException | SQLException e) {
+            String remote = info.getProperty(".remote");
+            Map j = backup.get(remote);
+            if (j != null) {
+                map.putAll(j);
+                throw new IOException("accept latest result for " + remote, e);
+            }
             e.printStackTrace();
         }
     }
