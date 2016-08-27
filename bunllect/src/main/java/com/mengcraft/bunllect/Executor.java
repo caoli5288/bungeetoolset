@@ -1,5 +1,6 @@
 package com.mengcraft.bunllect;
 
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
@@ -27,13 +28,17 @@ public class Executor implements Listener {
 
     @EventHandler
     public void handle(PlayerDisconnectEvent event) {
-        EntityQueue.QUEUE.offer(new Entity(
-                event.getPlayer().getName(),
-                event.getPlayer().getAddress().getAddress().getHostAddress(),
-                getLife(event.getPlayer().getName()),
-                event.getPlayer().getServer().getInfo().getName(),
-                host
-        ));
+        ProxiedPlayer p = event.getPlayer();
+        int life = getLife(p.getName());
+        if (p.getServer() != null) {
+            EntityQueue.QUEUE.offer(new Entity(
+                    p.getName(),
+                    p.getAddress().getAddress().getHostAddress(),
+                    life,
+                    p.getServer().getInfo().getName(),
+                    host
+            ));
+        }
     }
 
     private int getLife(String name) {
