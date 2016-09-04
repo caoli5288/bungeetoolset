@@ -31,7 +31,7 @@ public class Main extends Plugin implements Listener {
         waterfall = getProxy().getName().equals("Waterfall");
 
         if (!folder.isDirectory()) {
-            if (folder.mkdir()) {
+            if (!folder.mkdir()) {
                 throw new RuntimeException(folder + " not a directory!");
             }
         }
