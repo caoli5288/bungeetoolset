@@ -1,0 +1,4 @@
+name: BungeeAgent
+main: com.mengcraft.agent.BungeeMain
+version: ${project.version}
+author: caoli5288
