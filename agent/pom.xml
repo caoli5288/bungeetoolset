@@ -8,7 +8,6 @@
     </parent>
 
     <artifactId>agent</artifactId>
-    <name>BungeeAgent</name>
 
     <repositories>
         <repository>

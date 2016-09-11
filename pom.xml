@@ -10,6 +10,7 @@
         <module>bunflux</module>
         <module>serverlist</module>
         <module>agent</module>
+        <module>querystat</module>
     </modules>
     <packaging>pom</packaging>
 
