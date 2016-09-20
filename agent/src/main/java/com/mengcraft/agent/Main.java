@@ -9,7 +9,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * Created on 16-9-8.
@@ -45,21 +47,49 @@ public class Main extends JavaPlugin implements Listener, BungeeAgent {
         for (int i = 0; i < size; i++) {
             accept(p, nodeList.get(i));
         }
+        if (!queue.isEmpty()) getServer().getScheduler().runTask(this, () -> processQueued());
     }
 
-    @Override
-    public void execute(List<String> commandList) {
-        Iterator it = getServer().getOnlinePlayers().iterator();
-        if (!it.hasNext()) {
-            throw new RuntimeException();
+    private boolean processQueued() {
+        if (!queue.isEmpty()) {
+            Iterator it = getServer().getOnlinePlayers().iterator();
+            if (!it.hasNext()) {
+                return false;
+            }
+
+            Player p = (Player) it.next();
+            for (List<String> list = queue.poll(); list != null; list = queue.poll()) {
+                p.sendPluginMessage(this, Message.CHANNEL, Message.encode(list));
+            }
+
+            return true;
         }
-        Player p = (Player) it.next();
-        p.sendPluginMessage(this, Message.CHANNEL, new Message(commandList).encode());
+        return false;
     }
 
     private void accept(Player p, Node node) {
         if (node.accept(p)) {
             execute(node.getCommandList(p));
+        }
+    }
+
+    private final Queue<List> queue = new LinkedList<>();
+
+    @Override
+    public void execute(List<String> commandList) {
+        execute(commandList, false);
+    }
+
+    @Override
+    public void execute(List<String> commandList, boolean queued) {
+        Iterator it = getServer().getOnlinePlayers().iterator();
+        if (it.hasNext()) {
+            Player p = (Player) it.next();
+            p.sendPluginMessage(this, Message.CHANNEL, Message.encode(commandList));
+        } else if (queued) {
+            queue.offer(commandList);
+        } else {
+            throw new RuntimeException("None player channel registered! Use queued");
         }
     }
 

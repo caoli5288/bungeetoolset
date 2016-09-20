@@ -1,9 +1,9 @@
 package com.mengcraft.agent;
 
-import com.google.common.collect.Lists;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -34,10 +34,10 @@ public class Node {
 
     public static Node decode(String in) {
         int i = in.indexOf('|');
-        if (i < 0) {
+        if (i < 0 || i + 1 == in.length()) {
             throw new IllegalArgumentException(in);
         }
-        return new Node(in.substring(0, i), Lists.newArrayList(in.substring(i + 1).split(";")));
+        return new Node(in.substring(0, i), Arrays.asList(in.substring(i + 1).split(";")));
     }
 
 }

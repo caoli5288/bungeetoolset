@@ -7,4 +7,6 @@ import java.util.List;
  */
 public interface BungeeAgent {
     void execute(List<String> commandList);
+
+    void execute(List<String> commandList, boolean queued);
 }

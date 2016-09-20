@@ -23,6 +23,7 @@ public class BungeeMain extends Plugin implements Listener {
             for (String command : message.getCommandList()) {
                 getProxy().getPluginManager().dispatchCommand(getProxy().getConsole(), command);
             }
+            event.setCancelled(true);
         }
     }
 

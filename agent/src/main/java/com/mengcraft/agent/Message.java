@@ -16,7 +16,7 @@ public class Message {
 
     private final List<String> commandList;
 
-    public Message(List<String> commandList) {
+    private Message(List<String> commandList) {
         this.commandList = commandList;
     }
 
@@ -34,6 +34,10 @@ public class Message {
             out.writeUTF(line);
         }
         return out.toByteArray();
+    }
+
+    public static byte[] encode(List<String> in) {
+        return new Message(in).encode();
     }
 
     public static Message decode(byte[] in) {
