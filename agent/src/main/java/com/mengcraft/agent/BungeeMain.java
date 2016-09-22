@@ -13,6 +13,7 @@ public class BungeeMain extends Plugin implements Listener {
 
     @Override
     public void onEnable() {
+        getProxy().registerChannel(Message.CHANNEL);
         getProxy().getPluginManager().registerListener(this, this);
     }
 
