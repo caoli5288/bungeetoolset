@@ -52,6 +52,7 @@ public class Main extends Plugin implements Listener {
                     RemoteProcessor.INSTANCE.process(in, f);
                 }
             });
+            getLogger().info("Invoke dynamic server list done!");
         } catch (IOException ignore) {
         }
     }

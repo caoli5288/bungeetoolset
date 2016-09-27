@@ -1,6 +1,5 @@
 package com.mengcraft.serverlist;
 
-import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.config.ConfigurationAdapter;
 import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.config.ServerInfo;

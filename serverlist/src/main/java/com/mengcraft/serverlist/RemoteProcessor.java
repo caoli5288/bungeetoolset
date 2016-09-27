@@ -45,23 +45,22 @@ public class RemoteProcessor extends Processor {
     private void process(Map<String, ServerInfo> map, Properties info) throws IOException {
         try {
             Class.forName(info.getProperty("driver"));
-            try (Connection conn = DriverManager.getConnection(info.getProperty("url"), info);
-                 Statement stat = conn.createStatement();
-                 ResultSet query = stat.executeQuery("select name,host,port,restricted from " + info.getProperty("table"))
-            ) {
+            try (Connection conn = DriverManager.getConnection(info.getProperty("url"), info)) {
+                Statement stat = conn.createStatement();
+                ResultSet query = stat.executeQuery("select name,host,port,restricted from " + info.getProperty("table"));
                 Map j = new HashMap();
                 process(j, query);
                 map.putAll(j);
-                backup.put(info.getProperty(".remote"), j);
-            }
+
+                backup.put(info.getProperty(".remote"), j);// Cache result for backup
+            }// Statement and ResultSet closed automatic if Connection closed?
         } catch (ClassNotFoundException | SQLException e) {
             String remote = info.getProperty(".remote");
-            Map j = backup.get(remote);
-            if (j != null) {
-                map.putAll(j);
-                throw new IOException("accept latest result for " + remote, e);
+            boolean backed = backup.containsKey(remote);
+            if (backed) {
+                map.putAll(backup.get(remote));
             }
-            e.printStackTrace();
+            throw new IOException(backed ? "Pick backed up result for " + remote : "Fail to query remote list " + remote, e);
         }
     }
 
