@@ -26,10 +26,16 @@ user=root
 password=wowsuchpassword
 ```
 
-特别的，请在你所定义的数据库里面手动创建你所定义的数据表，以下几列是必须的。
-* name char
-* host char
-* port smallint unsigned
-* restricted tinyint unsigned
+特别的，请在你所定义的数据库里面手动创建你所定义的数据表，参考语句如下。栏位的意义应该不用多解释。
+```SQL
+CREATE TABLE `server_list` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` char(32) NOT NULL,
+  `host` char(15) NOT NULL,
+  `port` smallint(5) unsigned NOT NULL,
+  `restricted` tinyint(3) unsigned NOT NULL,
+  PRIMARY KEY (`id`)
+)
+```
 
 你可以根据你的数据库实际情况调整数据类型，并且推荐使用一个自增的int类型的自增主键。
