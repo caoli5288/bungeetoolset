@@ -12,11 +12,11 @@ import java.util.List;
 public class Node {
 
     private final String permission;
-    private final List<String> commandList;
+    private final List<String> command;
 
-    private Node(String permission, List<String> commandList) {
+    private Node(String permission, List<String> command) {
         this.permission = permission;
-        this.commandList = commandList;
+        this.command = command;
     }
 
     public boolean accept(Player p) {
@@ -24,10 +24,10 @@ public class Node {
     }
 
     public List<String> getCommandList(Player p) {
-        int size = commandList.size();
+        int size = command.size();
         List<String> out = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            out.add(commandList.get(i).replace("%player%", p.getName()));
+            out.add(command.get(i).replace("%player%", p.getName()));
         }
         return out;
     }

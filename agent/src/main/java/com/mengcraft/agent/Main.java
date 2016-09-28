@@ -71,7 +71,7 @@ public class Main extends JavaPlugin implements Listener, Agent {
             if (queued) {
                 queue.offer(message);
             } else {
-                getLogger().info("None player channel registered! Use queued.");
+                getLogger().warning("None player channel registered!");
             }
         } else {
             player.sendPluginMessage(this, Message.CHANNEL, message.encode());
@@ -95,7 +95,7 @@ public class Main extends JavaPlugin implements Listener, Agent {
 
     private Player getPlayer() {
         Iterator<? extends Player> it = getServer().getOnlinePlayers().iterator();
-        while (!it.hasNext()) {
+        while (it.hasNext()) {
             Player p = it.next();
             if (p.getListeningPluginChannels().contains(Message.CHANNEL)) {
                 return p;
