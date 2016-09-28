@@ -12,27 +12,43 @@ import java.util.List;
  */
 public class Message {
 
-    public static final String CHANNEL = "BungeeAgent";
+    public static final String CHANNEL = "Agent";
 
-    private final List<String> commandList;
+    private final Executor executor;
+    private final List<String> command;
+    private final boolean queued;
 
-    private Message(List<String> commandList) {
-        this.commandList = commandList;
+
+    private Message(Executor executor, List<String> command, boolean queued) {
+        this.executor = executor;
+        this.command = command;
+        this.queued = queued;
     }
 
-    public List<String> getCommandList() {
-        return commandList;
+    private Message(List<String> command) {
+        this(Executor.BUNGEE, command, false);
+    }
+
+    public List<String> getCommand() {
+        return command;
+    }
+
+    public Executor getExecutor() {
+        return executor;
+    }
+
+    public boolean isQueued() {
+        return queued;
     }
 
     public byte[] encode() {
-        if (commandList.size() < 1) {
-            throw new IllegalArgumentException(commandList.toString());
-        }
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
-        out.writeShort(commandList.size());
-        for (String line : commandList) {
+        out.writeByte(executor.ordinal());
+        out.writeByte(command.size());
+        for (String line : command) {
             out.writeUTF(line);
         }
+        out.writeBoolean(queued);
         return out.toByteArray();
     }
 
@@ -42,12 +58,19 @@ public class Message {
 
     public static Message decode(byte[] in) {
         ByteArrayDataInput input = ByteStreams.newDataInput(in);
-        int len = input.readShort();
+        Executor executor = Executor.get(input.readByte());
+
+        int len = input.readByte();
         ArrayList<String> out = new ArrayList<>(len);
         for (int i = 0; i < len; i++) {
             out.add(input.readUTF());
         }
-        return new Message(out);
+
+        return new Message(executor, out, input.readBoolean());
+    }
+
+    public static Message get(List<String> command) {
+        return new Message(new ArrayList<>(command));
     }
 
 }

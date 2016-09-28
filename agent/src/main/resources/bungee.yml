@@ -1,4 +1,4 @@
-name: BungeeAgent
-main: com.mengcraft.agent.BungeeMain
+name: Agent
+main: com.mengcraft.agent.Bungee
 version: ${project.version}
 author: caoli5288

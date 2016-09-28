@@ -3,7 +3,7 @@ package com.mengcraft.agent;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerRegisterChannelEvent;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -16,9 +16,9 @@ import java.util.Queue;
 /**
  * Created on 16-9-8.
  */
-public class Main extends JavaPlugin implements Listener, BungeeAgent {
+public class Main extends JavaPlugin implements Listener, Agent {
 
-    private final List<Node> nodeList = new ArrayList<>();
+    private final List<Node> handle = new ArrayList<>();
 
     @Override
     public void onEnable() {
@@ -27,12 +27,12 @@ public class Main extends JavaPlugin implements Listener, BungeeAgent {
         List<String> set = getConfig().getStringList("set");
         int size = set.size();
         for (int i = 0; i < size; i++) {
-            nodeList.add(Node.decode(set.get(i)));
+            handle.add(Node.decode(set.get(i)));
         }
 
         getServer().getMessenger().registerOutgoingPluginChannel(this, Message.CHANNEL);
 
-        getServer().getServicesManager().register(BungeeAgent.class,
+        getServer().getServicesManager().register(Agent.class,
                 this,
                 this,
                 ServicePriority.Normal);
@@ -40,31 +40,20 @@ public class Main extends JavaPlugin implements Listener, BungeeAgent {
         getServer().getPluginManager().registerEvents(this, this);
     }
 
+    private final Queue<Message> queue = new LinkedList<>();
+
     @EventHandler
-    public void handle(PlayerJoinEvent event) {
-        Player p = event.getPlayer();
-        int size = nodeList.size();
-        for (int i = 0; i < size; i++) {
-            accept(p, nodeList.get(i));
-        }
-        if (!queue.isEmpty()) getServer().getScheduler().runTask(this, () -> processQueued());
-    }
+    public void handle(PlayerRegisterChannelEvent event) {
+        if (eq(event.getChannel(), Message.CHANNEL)) {
+            Player p = event.getPlayer();
 
-    private boolean processQueued() {
-        if (!queue.isEmpty()) {
-            Iterator it = getServer().getOnlinePlayers().iterator();
-            if (!it.hasNext()) {
-                return false;
+            // Process queue at first
+            while (!queue.isEmpty()) {
+                p.sendPluginMessage(this, Message.CHANNEL, queue.poll().encode());
             }
 
-            Player p = (Player) it.next();
-            for (List<String> list = queue.poll(); list != null; list = queue.poll()) {
-                p.sendPluginMessage(this, Message.CHANNEL, Message.encode(list));
-            }
-
-            return true;
+            handle.forEach(node -> accept(p, node));
         }
-        return false;
     }
 
     private void accept(Player p, Node node) {
@@ -73,24 +62,44 @@ public class Main extends JavaPlugin implements Listener, BungeeAgent {
         }
     }
 
-    private final Queue<List> queue = new LinkedList<>();
-
     @Override
-    public void execute(List<String> commandList) {
-        execute(commandList, false);
+    public void execute(Executor executor, List<String> command, boolean queued) {
+        if (executor == Executor.BUNGEE) {
+            Iterator it = getServer().getOnlinePlayers().iterator();
+            if (it.hasNext()) {
+                Player p = (Player) it.next();
+                if (p.getListeningPluginChannels().contains(Message.CHANNEL)) {
+                    p.sendPluginMessage(this, Message.CHANNEL, Message.encode(command));
+                } else if (queued) {
+                    queue.offer(Message.get(command));
+                }
+            } else if (queued) {
+                queue.offer(Message.get(command));
+            } else {
+                getLogger().info("None player channel registered! Use queued.");
+            }
+        } else {
+            throw new UnsupportedOperationException();
+        }
     }
 
     @Override
-    public void execute(List<String> commandList, boolean queued) {
-        Iterator it = getServer().getOnlinePlayers().iterator();
-        if (it.hasNext()) {
-            Player p = (Player) it.next();
-            p.sendPluginMessage(this, Message.CHANNEL, Message.encode(commandList));
-        } else if (queued) {
-            queue.offer(commandList);
-        } else {
-            throw new RuntimeException("None player channel registered! Use queued");
-        }
+    public void execute(Executor executor, List<String> command) {
+        execute(executor, command, false);
+    }
+
+    @Override
+    public void execute(List<String> command, boolean queued) {
+        execute(Executor.BUNGEE, command, queued);
+    }
+
+    @Override
+    public void execute(List<String> command) {
+        execute(Executor.BUNGEE, command, false);
+    }
+
+    public static boolean eq(Object i, Object j) {
+        return i == j || i.equals(j);
     }
 
 }
