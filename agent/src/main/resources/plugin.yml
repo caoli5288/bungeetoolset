@@ -2,3 +2,11 @@ name: Agent
 main: com.mengcraft.agent.Main
 version: ${project.version}
 author: caoli5288
+
+commands:
+  agent:
+    permission: agent.admin
+
+permissions:
+  agent.admin:
+    default: op

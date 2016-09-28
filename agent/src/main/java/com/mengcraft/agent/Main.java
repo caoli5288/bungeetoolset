@@ -1,5 +1,8 @@
 package com.mengcraft.agent;
 
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -8,6 +11,7 @@ import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,6 +43,41 @@ public class Main extends JavaPlugin implements Listener, Agent {
                 ServicePriority.Normal);
 
         getServer().getPluginManager().registerEvents(this, this);
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command i, String label, String[] j) {
+        Iterator<String> it = Arrays.asList(j).iterator();
+        if (it.hasNext()) {
+            String next = it.next();
+            if (eq(next, "bungee") && it.hasNext()) {
+                return sendBungee(sender, it);
+            } else {
+                sender.sendMessage("/agent bungee [command...]");
+            }
+        } else {
+            sender.sendMessage("/agent bungee [command...]");
+        }
+        return false;
+    }
+
+    private boolean sendBungee(CommandSender sender, Iterator<String> it) {
+        StringBuilder builder = new StringBuilder(it.next());
+        while (it.hasNext()) {
+            builder.append(" ");
+            builder.append(it.next());
+        }
+        return sendBungee(sender, builder.toString());
+    }
+
+    private boolean sendBungee(CommandSender sender, String command) {
+        String info = ChatColor.GREEN + "Send " + command + " done";
+        getLogger().info(info);
+        if (sender instanceof Player) {
+            sender.sendMessage(info);
+        }
+        execute(Arrays.asList(command));
+        return true;
     }
 
     private final Queue<Message> queue = new LinkedList<>();
