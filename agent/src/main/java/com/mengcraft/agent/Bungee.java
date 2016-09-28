@@ -21,8 +21,17 @@ public class Bungee extends Plugin implements Listener {
     public void handle(PluginMessageEvent event) {
         if (event.getTag().equals(Message.CHANNEL) && event.getSender() instanceof Server) {
             Message message = Message.decode(event.getData());
-            for (String command : message.getCommand()) {
-                getProxy().getPluginManager().dispatchCommand(getProxy().getConsole(), command);
+            if (message.getExecutor() == Executor.BUNGEE) {
+                for (String command : message.getCommand()) {
+                    getProxy().getPluginManager().dispatchCommand(getProxy().getConsole(), command);
+                }
+            } else {
+                String sender = Server.class.cast(event.getSender()).getInfo().getName();
+                getProxy().getServers().forEach((name, info) -> {
+                    if (!sender.equals(name)) {
+                        info.sendData(Message.CHANNEL, event.getData(), message.isQueued());
+                    }
+                });
             }
             event.setCancelled(true);
         }

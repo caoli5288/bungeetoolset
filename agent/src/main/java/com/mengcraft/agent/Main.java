@@ -31,6 +31,7 @@ public class Main extends JavaPlugin implements Listener, Agent {
         }
 
         getServer().getMessenger().registerOutgoingPluginChannel(this, Message.CHANNEL);
+        getServer().getMessenger().registerIncomingPluginChannel(this, Message.CHANNEL, new MessageListener(this));
 
         getServer().getServicesManager().register(Agent.class,
                 this,
@@ -64,22 +65,16 @@ public class Main extends JavaPlugin implements Listener, Agent {
 
     @Override
     public void execute(Executor executor, List<String> command, boolean queued) {
-        if (executor == Executor.BUNGEE) {
-            Iterator it = getServer().getOnlinePlayers().iterator();
-            if (it.hasNext()) {
-                Player p = (Player) it.next();
-                if (p.getListeningPluginChannels().contains(Message.CHANNEL)) {
-                    p.sendPluginMessage(this, Message.CHANNEL, Message.encode(command));
-                } else if (queued) {
-                    queue.offer(Message.get(command));
-                }
-            } else if (queued) {
-                queue.offer(Message.get(command));
+        Message message = Message.get(executor, command, queued);
+        Player player = getPlayer();
+        if (eq(player, null)) {
+            if (queued) {
+                queue.offer(message);
             } else {
                 getLogger().info("None player channel registered! Use queued.");
             }
         } else {
-            throw new UnsupportedOperationException();
+            player.sendPluginMessage(this, Message.CHANNEL, message.encode());
         }
     }
 
@@ -96,6 +91,17 @@ public class Main extends JavaPlugin implements Listener, Agent {
     @Override
     public void execute(List<String> command) {
         execute(Executor.BUNGEE, command, false);
+    }
+
+    private Player getPlayer() {
+        Iterator<? extends Player> it = getServer().getOnlinePlayers().iterator();
+        while (!it.hasNext()) {
+            Player p = it.next();
+            if (p.getListeningPluginChannels().contains(Message.CHANNEL)) {
+                return p;
+            }
+        }
+        return null;
     }
 
     public static boolean eq(Object i, Object j) {

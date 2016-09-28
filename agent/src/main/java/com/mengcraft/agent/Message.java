@@ -25,10 +25,6 @@ public class Message {
         this.queued = queued;
     }
 
-    private Message(List<String> command) {
-        this(Executor.BUNGEE, command, false);
-    }
-
     public List<String> getCommand() {
         return command;
     }
@@ -52,10 +48,6 @@ public class Message {
         return out.toByteArray();
     }
 
-    public static byte[] encode(List<String> in) {
-        return new Message(in).encode();
-    }
-
     public static Message decode(byte[] in) {
         ByteArrayDataInput input = ByteStreams.newDataInput(in);
         Executor executor = Executor.get(input.readByte());
@@ -69,8 +61,8 @@ public class Message {
         return new Message(executor, out, input.readBoolean());
     }
 
-    public static Message get(List<String> command) {
-        return new Message(new ArrayList<>(command));
+    public static Message get(Executor executor, List<String> command, boolean queued) {
+        return new Message(executor, new ArrayList<>(command), queued);
     }
 
 }
