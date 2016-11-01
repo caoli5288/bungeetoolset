@@ -92,7 +92,9 @@ public class Main extends JavaPlugin implements Listener, Agent {
                 p.sendPluginMessage(this, Message.CHANNEL, queue.poll().encode());
             }
 
-            handle.forEach(node -> accept(p, node));
+            if (!p.hasPermission("agent.login.bypass")) {
+                handle.forEach(node -> accept(p, node));
+            }
         }
     }
 
