@@ -30,7 +30,7 @@ public class Executor implements Listener {
     public void handle(PlayerDisconnectEvent event) {
         ProxiedPlayer p = event.getPlayer();
         int life = getLife(p.getName());
-        if (p.getServer() != null) {
+        if (life > 0 && p.getServer() != null) {
             EntityQueue.QUEUE.offer(new Entity(
                     p.getName(),
                     p.getAddress().getAddress().getHostAddress(),
