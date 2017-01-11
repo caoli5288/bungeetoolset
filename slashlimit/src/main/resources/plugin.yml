@@ -1,0 +1,4 @@
+name: SlashLimit
+main: com.mengcraft.slashlimit.Main
+version: ${project.version}
+author: mengcraft

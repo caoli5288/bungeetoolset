@@ -11,6 +11,7 @@
         <module>serverlist</module>
         <module>agent</module>
         <module>querystat</module>
+        <module>slashlimit</module>
     </modules>
     <packaging>pom</packaging>
 
