@@ -1,0 +1,4 @@
+name: i5channel
+main: com.i5mc.bungee.channel.FwdListener
+version: ${project.version}
+author: i5mc

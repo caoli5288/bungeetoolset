@@ -12,6 +12,7 @@
         <module>agent</module>
         <module>querystat</module>
         <module>slashlimit</module>
+        <module>channel</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -31,7 +32,12 @@
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-proxy</artifactId>
             <version>1.10-SNAPSHOT</version>
-            <type>jar</type>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.14</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
