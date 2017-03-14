@@ -8,11 +8,11 @@
         <module>kick</module>
         <module>bunllect</module>
         <module>bunflux</module>
-        <module>serverlist</module>
+        <module>bungeelistd</module>
         <module>agent</module>
-        <module>querystat</module>
+        <module>stat</module>
         <module>slashlimit</module>
-        <module>channel</module>
+        <module>i5channel</module>
     </modules>
     <packaging>pom</packaging>
 
