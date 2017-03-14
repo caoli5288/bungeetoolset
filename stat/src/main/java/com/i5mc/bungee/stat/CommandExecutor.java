@@ -1,4 +1,4 @@
-package com.mengcraft.querystat;
+package com.i5mc.bungee.stat;
 
 import com.google.common.collect.Lists;
 import net.md_5.bungee.api.ChatColor;
@@ -19,11 +19,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class CommandExecutor extends Command {
 
-
     private final ProxyServer server;
 
     public CommandExecutor(ProxyServer server) {
-        super("querystat");
+        super("stat");
         this.server = server;
     }
 
@@ -40,7 +39,7 @@ public class CommandExecutor extends Command {
 
     private void execute(CommandSender sender, Iterator<String> it) throws IOException {
         if (it.hasNext() && it.next().equals("export")) {
-            BufferedWriter writer = new BufferedWriter(new FileWriter("querystat.csv", false));
+            BufferedWriter writer = new BufferedWriter(new FileWriter("stat.csv", false));
             writer.write("\"id\",\"name\",\"addr\",\"online\",\"max\",\"motd\"");
             writer.newLine();
             writer.flush();
@@ -48,9 +47,9 @@ public class CommandExecutor extends Command {
             server.getServers().forEach((name, info) -> {
                 write(writer, id, info);
             });
-            sender.sendMessage(ChatColor.GREEN + "Exporting to querystat.csv...");
+            sender.sendMessage(ChatColor.GREEN + "Exporting to stat.csv...");
         } else {
-            sender.sendMessage(ChatColor.RED + "/querystat export");
+            sender.sendMessage(ChatColor.RED + "/stat export");
         }
     }
 

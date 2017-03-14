@@ -1,4 +1,4 @@
-package com.mengcraft.querystat;
+package com.i5mc.bungee.stat;
 
 import net.md_5.bungee.api.plugin.Plugin;
 

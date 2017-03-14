@@ -1,4 +1,4 @@
-package com.mengcraft.serverlist;
+package com.i5mc.bungee.list;
 
 import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.config.ServerInfo;

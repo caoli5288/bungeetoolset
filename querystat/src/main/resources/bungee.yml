@@ -1,4 +1,0 @@
-name: QueryStat
-main: com.mengcraft.querystat.Main
-version: ${project.version}
-author: caoli5288

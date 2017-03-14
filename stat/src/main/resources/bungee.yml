@@ -1,0 +1,4 @@
+name: Stat
+main: com.i5mc.bungee.stat.Main
+version: ${project.version}
+author: caoli5288

@@ -5,5 +5,5 @@
         <groupId>com.mengcraft</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>querystat</artifactId>
+    <artifactId>bungeelistd</artifactId>
 </project>

@@ -1,4 +1,0 @@
-name: ServerList
-main: com.mengcraft.serverlist.Main
-version: ${project.version}
-author: mengcraft.com
