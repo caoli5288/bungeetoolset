@@ -1,10 +1,12 @@
 package com.i5mc.bungee.list;
 
+import lombok.val;
 import net.md_5.bungee.api.config.ConfigurationAdapter;
 import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.config.ServerInfo;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -15,9 +17,9 @@ public class InjectedAdapter implements ConfigurationAdapter {
     private final ConfigurationAdapter proto;
     private final Main main;
 
-    public InjectedAdapter(Main main) {
+    InjectedAdapter(Main main, ConfigurationAdapter proto) {
         this.main = main;
-        proto = main.getProxy().getConfigurationAdapter();
+        this.proto = proto;
     }
 
     @Override
@@ -51,7 +53,7 @@ public class InjectedAdapter implements ConfigurationAdapter {
         if (main.isWaterfall()) {
             main.process(out);
         } else {
-            main.newActive(out);
+            main.setActive(new HashMap<>(out));
             main.getProxy().getServers().forEach((name, info) -> {
                 if (!out.containsKey(name)) {
                     out.put(name, info);
@@ -74,6 +76,13 @@ public class InjectedAdapter implements ConfigurationAdapter {
     @Override
     public Collection<String> getPermissions(String s) {
         return proto.getPermissions(s);
+    }
+
+    public static void inject(Main main) {
+        val p = main.getProxy().getConfigurationAdapter();
+        if (p instanceof InjectedAdapter) throw new IllegalStateException();
+        val i = new InjectedAdapter(main, p);
+        main.getProxy().setConfigurationAdapter(i);
     }
 
 }

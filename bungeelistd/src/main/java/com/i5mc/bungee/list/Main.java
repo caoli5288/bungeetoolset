@@ -1,5 +1,6 @@
 package com.i5mc.bungee.list;
 
+import lombok.val;
 import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -30,21 +31,24 @@ public class Main extends Plugin implements Listener {
     public void onEnable() {
         waterfall = getProxy().getName().equals("Waterfall");
 
-        if (!folder.isDirectory()) {
-            if (!folder.mkdir()) {
-                throw new RuntimeException(folder + " not a directory!");
+        if (!FOLDER.isDirectory()) {
+            val old = new File("server.list.d");
+            if (!(old.isDirectory() && old.renameTo(FOLDER))) {
+                if (!old.renameTo(FOLDER)) {
+                    if (!FOLDER.mkdir()) throw new RuntimeException(FOLDER + " not a directory!");
+                }
             }
         }
 
         process(getProxy().getServers());// init
+        InjectedAdapter.inject(this);
 
-        getProxy().setConfigurationAdapter(new InjectedAdapter(this));
         if (!waterfall) getProxy().getPluginManager().registerListener(this, this);
     }
 
     public void process(Map<String, ServerInfo> in) {
         try {
-            Files.walk(folder.toPath(), 1).forEach(path -> {
+            Files.walk(FOLDER.toPath(), 1).forEach(path -> {
                 File f = path.toFile();
                 if (FileProcessor.INSTANCE.accept(f)) {
                     FileProcessor.INSTANCE.process(in, f);
@@ -57,8 +61,8 @@ public class Main extends Plugin implements Listener {
         }
     }
 
-    public Map<String, ServerInfo> newActive(Map<String, ServerInfo> in) {
-        return active = new HashMap<>(in);
+    public void setActive(Map<String, ServerInfo> active) {
+        this.active = active;
     }
 
     private Field field;
@@ -127,6 +131,6 @@ public class Main extends Plugin implements Listener {
         return waterfall;
     }
 
-    public final File folder = new File("server.list.d");
+    public static final File FOLDER = new File("list.d");
 
 }
