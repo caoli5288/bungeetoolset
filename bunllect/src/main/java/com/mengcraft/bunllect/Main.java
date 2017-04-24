@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
+import java.sql.Statement;
 import java.util.Properties;
 
 /**
@@ -59,6 +60,12 @@ public class Main extends Plugin {
     @Override
     public void onDisable() {
         shutdown = true;// To interrupt blocking.
-        EntityQueue.QUEUE.offer(() -> false);
+        EntityQueue.QUEUE.offer(new IEntity() {
+            public void update(Statement i) {
+            }
+            public boolean valid() {
+                return false;
+            }
+        });
     }
 }

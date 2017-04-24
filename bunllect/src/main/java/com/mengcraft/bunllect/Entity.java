@@ -1,5 +1,8 @@
 package com.mengcraft.bunllect;
 
+import java.sql.SQLException;
+import java.sql.Statement;
+
 /**
  * Created on 16-7-27.
  */
@@ -23,8 +26,8 @@ public class Entity implements IEntity {
     }
 
     @Override
-    public String toString() {
-        return ("INSERT " +
+    public void update(Statement statement) throws SQLException {
+        statement.executeUpdate("INSERT " +
                 "INTO" +
                 " bunllect " +
                 "SET" +
@@ -35,4 +38,5 @@ public class Entity implements IEntity {
                 " host = '" + host + "'" +
                 ";");
     }
+
 }

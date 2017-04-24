@@ -38,7 +38,7 @@ public class WriteBackend implements Runnable {
     private void processEntity(IEntity entity) {
         try (Connection conn = factory.getConnection()) {
             try (Statement statement = conn.createStatement()) {
-                statement.executeUpdate(entity.toString());
+                entity.update(statement);
             }
         } catch (SQLException e) {
             e.printStackTrace();
