@@ -3,7 +3,7 @@ package com.mengcraft.bunllect;
 /**
  * Created on 16-7-27.
  */
-public class Entity {
+public class Entity implements IEntity {
     private String name;
     private String ip;
     private int life;
@@ -18,50 +18,21 @@ public class Entity {
         this.host = host;
     }
 
-    public Entity() {
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getIp() {
-        return ip;
-    }
-
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
-    public int getLife() {
-        return life;
-    }
-
-    public void setLife(int life) {
-        this.life = life;
-    }
-
-    public String getInstance() {
-        return instance;
-    }
-
-    public void setInstance(String instance) {
-        this.instance = instance;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
-
     public boolean valid() {
-        return life != 0;
+        return life > 60;
+    }
+
+    @Override
+    public String toString() {
+        return ("INSERT " +
+                "INTO" +
+                " bunllect " +
+                "SET" +
+                " name = '" + name + "'," +
+                " ip = '" + ip + "'," +
+                " life = " + life + "," +
+                " instance = '" + instance + "'," +
+                " host = '" + host + "'" +
+                ";");
     }
 }

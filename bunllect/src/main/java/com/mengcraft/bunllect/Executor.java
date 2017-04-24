@@ -29,14 +29,22 @@ public class Executor implements Listener {
     @EventHandler
     public void handle(PlayerDisconnectEvent event) {
         ProxiedPlayer p = event.getPlayer();
-        int life = getLife(p.getName());
+        String who = p.getName();
+        int life = getLife(who);
         if (life > 0 && p.getServer() != null) {
+            String ip = p.getAddress().getAddress().getHostAddress();
             EntityQueue.QUEUE.offer(new Entity(
-                    p.getName(),
-                    p.getAddress().getAddress().getHostAddress(),
+                    who,
+                    ip,
                     life,
                     p.getServer().getInfo().getName(),
                     host
+            ));
+            EntityQueue.QUEUE.offer(new EntityTotal(
+                    who,
+                    p.getUniqueId(),
+                    ip,
+                    life
             ));
         }
     }

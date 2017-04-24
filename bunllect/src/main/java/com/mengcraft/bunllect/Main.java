@@ -59,6 +59,6 @@ public class Main extends Plugin {
     @Override
     public void onDisable() {
         shutdown = true;// To interrupt blocking.
-        EntityQueue.QUEUE.offer(new Entity());
+        EntityQueue.QUEUE.offer(() -> false);
     }
 }
