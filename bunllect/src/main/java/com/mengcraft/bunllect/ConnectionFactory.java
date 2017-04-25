@@ -1,5 +1,7 @@
 package com.mengcraft.bunllect;
 
+import lombok.val;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -14,15 +16,18 @@ public class ConnectionFactory {
     private String user;
     private String password;
 
-    private Connection connection;
+    private volatile Connection connection;
 
-    public Connection newConnection() throws SQLException {
-        try {
-            Class.forName(driver);
-        } catch (ClassNotFoundException e) {
-            throw new SQLException("Not found " + driver, e);
+    public void newConnection() throws SQLException {
+        val c = connection;
+        if (c == null || !c.isValid(1)) {
+            try {
+                Class.forName(driver);
+            } catch (ClassNotFoundException e) {
+                throw new SQLException("Not found " + driver, e);
+            }
+            connection = DriverManager.getConnection(url, user, password);
         }
-        return DriverManager.getConnection(url, user, password);
     }
 
     public String getDriver() {
@@ -58,8 +63,11 @@ public class ConnectionFactory {
     }
 
     public Connection getConnection() throws SQLException {
-        if (connection == null || !connection.isValid(1)) {
-            connection = newConnection();
+        val c = connection;
+        if (c == null || !c.isValid(1)) {
+            synchronized (this) {
+                newConnection();
+            }
         }
         return connection;
     }

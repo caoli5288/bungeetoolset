@@ -1,4 +1,6 @@
 name: Bunllect
-main: com.mengcraft.bunllect.Main
+main: com.mengcraft.bunllect.MyPlugin
 version: ${project.version}
 author: caoli5288
+
+depend: [PlaceholderAPI]
