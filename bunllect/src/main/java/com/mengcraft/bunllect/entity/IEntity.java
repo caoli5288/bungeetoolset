@@ -1,4 +1,4 @@
-package com.mengcraft.bunllect;
+package com.mengcraft.bunllect.entity;
 
 import java.sql.SQLException;
 import java.sql.Statement;

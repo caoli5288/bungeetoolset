@@ -1,5 +1,7 @@
 package com.mengcraft.bunllect;
 
+import com.mengcraft.bunllect.entity.Entity;
+import com.mengcraft.bunllect.entity.EntityTotal;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;

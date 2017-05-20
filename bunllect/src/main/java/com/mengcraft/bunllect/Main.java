@@ -1,5 +1,8 @@
 package com.mengcraft.bunllect;
 
+import com.mengcraft.bunllect.entity.EntityOnline;
+import com.mengcraft.bunllect.entity.IEntity;
+import lombok.val;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.io.File;
@@ -11,6 +14,7 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.sql.Statement;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created on 16-5-30.
@@ -31,18 +35,18 @@ public class Main extends Plugin {
             }
         }
 
-        Properties conf = new Properties();
+        Properties p = new Properties();
         try {
-            conf.load(new FileReader(file));
+            p.load(new FileReader(file));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setDriver(conf.getProperty("bunllect.jdbc.driver"));
-        factory.setUrl(conf.getProperty("bunllect.jdbc.url"));
-        factory.setUser(conf.getProperty("bunllect.jdbc.user"));
-        factory.setPassword(conf.getProperty("bunllect.jdbc.password"));
+        factory.setDriver(p.getProperty("bunllect.jdbc.driver"));
+        factory.setUrl(p.getProperty("bunllect.jdbc.url"));
+        factory.setUser(p.getProperty("bunllect.jdbc.user"));
+        factory.setPassword(p.getProperty("bunllect.jdbc.password"));
 
         WriteBackend backend = new WriteBackend(this, factory);
 
@@ -54,7 +58,14 @@ public class Main extends Plugin {
         } catch (UnknownHostException ignore) {
             host = "";
         }
-        getProxy().getPluginManager().registerListener(this, new Executor(host));
+
+        val h = host;
+
+        getProxy().getScheduler().schedule(this, () -> {
+            EntityQueue.QUEUE.offer(EntityOnline.build(h, getProxy().getOnlineCount()));
+        }, 10, 10, TimeUnit.SECONDS);
+
+        getProxy().getPluginManager().registerListener(this, new Executor(h));
     }
 
     @Override
@@ -63,6 +74,7 @@ public class Main extends Plugin {
         EntityQueue.QUEUE.offer(new IEntity() {
             public void update(Statement i) {
             }
+
             public boolean valid() {
                 return false;
             }

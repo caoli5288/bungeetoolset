@@ -1,5 +1,7 @@
 package com.mengcraft.bunllect;
 
+import com.mengcraft.bunllect.entity.IEntity;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;

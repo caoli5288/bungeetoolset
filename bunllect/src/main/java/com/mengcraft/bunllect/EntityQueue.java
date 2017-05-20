@@ -1,5 +1,7 @@
 package com.mengcraft.bunllect;
 
+import com.mengcraft.bunllect.entity.IEntity;
+
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
