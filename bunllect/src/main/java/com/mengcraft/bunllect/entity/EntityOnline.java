@@ -14,13 +14,15 @@ public class EntityOnline implements IEntity {
 
     private final String host;
     private final int count;
+    private final int throttle;
 
     private EntityOnline last;
     private int wave;
 
-    private EntityOnline(String host, int count) {
+    private EntityOnline(String host, int count, int throttle) {
         this.host = host;
         this.count = count;
+        this.throttle = throttle;
     }
 
     @Override
@@ -33,11 +35,11 @@ public class EntityOnline implements IEntity {
 
     @Override
     public boolean valid() {
-        return last == null || (wave = Math.abs(last.count - count)) > 50;
+        return !(last == null) && last.count > 0 && Math.abs(wave = count - last.count) > throttle;
     }
 
-    public static EntityOnline build(String host, int count) {
-        val out = new EntityOnline(host, count);
+    public static EntityOnline build(String host, int count, int throttle) {
+        val out = new EntityOnline(host, count, throttle);
         if (!(next == null)) out.last = next;
         next = out;
         return out;

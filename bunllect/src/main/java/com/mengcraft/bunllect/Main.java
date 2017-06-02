@@ -59,13 +59,15 @@ public class Main extends Plugin {
             host = "";
         }
 
+        getProxy().getPluginManager().registerListener(this, new Executor(host));
+
+        int period = Integer.parseInt(p.getProperty("bunllect.online.period", "5"));
+        int throttle = Integer.parseInt(p.getProperty("bunllect.online.throttle", "20"));
         val h = host;
 
         getProxy().getScheduler().schedule(this, () -> {
-            EntityQueue.QUEUE.offer(EntityOnline.build(h, getProxy().getOnlineCount()));
-        }, 10, 10, TimeUnit.SECONDS);
-
-        getProxy().getPluginManager().registerListener(this, new Executor(h));
+            EntityQueue.QUEUE.offer(EntityOnline.build(h, getProxy().getOnlineCount(), throttle));
+        }, period, period, TimeUnit.SECONDS);
     }
 
     @Override
