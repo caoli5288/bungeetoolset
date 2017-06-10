@@ -6,20 +6,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Created on 17-4-25.
  */
 public class MyPlugin extends JavaPlugin {
-
-    static class Hold {
-        public static final Map<UUID, CompletableFuture<Integer>> H = new HashMap<>();
-    }
 
     static ConnectionFactory conn;
 
