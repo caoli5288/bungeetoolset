@@ -1,25 +1,22 @@
 package com.mengcraft.bunllect.entity;
 
+import lombok.AllArgsConstructor;
+
 import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
  * Created on 16-7-27.
  */
+@AllArgsConstructor
 public class Entity implements IEntity {
+
     private String name;
     private String ip;
     private int life;
     private String instance;
     private String host;
-
-    public Entity(String name, String ip, int life, String instance, String host) {
-        this.name = name;
-        this.ip = ip;
-        this.life = life;
-        this.instance = instance;
-        this.host = host;
-    }
+    private String hostIp;
 
     public boolean valid() {
         return life > 60;
@@ -35,6 +32,7 @@ public class Entity implements IEntity {
                 " ip = '" + ip + "'," +
                 " life = " + life + "," +
                 " instance = '" + instance + "'," +
+                " host_ip = '" + hostIp + "'," +
                 " host = '" + host + "'" +
                 ";");
     }
