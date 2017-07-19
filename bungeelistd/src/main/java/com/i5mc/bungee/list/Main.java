@@ -1,5 +1,9 @@
 package com.i5mc.bungee.list;
 
+import com.google.gson.Gson;
+import com.i5mc.bungee.list.rt.RT;
+import com.i5mc.bungee.list.rt.RTServer;
+import lombok.SneakyThrows;
 import lombok.val;
 import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -12,10 +16,10 @@ import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.util.CaseInsensitiveMap;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -27,7 +31,7 @@ public class Main extends Plugin implements Listener {
     private Map<String, ServerInfo> active;
     private boolean waterfall;
 
-    @Override
+    @SneakyThrows
     public void onEnable() {
         waterfall = getProxy().getName().equals("Waterfall");
 
@@ -44,6 +48,23 @@ public class Main extends Plugin implements Listener {
         InjectedAdapter.inject(this);
 
         if (!waterfall) getProxy().getPluginManager().registerListener(this, this);
+
+        val i = new File(getDataFolder(), "config.yml");
+        if (!i.isFile()) {
+            Files.copy(getResourceAsStream("config.yml"), i.toPath());
+        }
+
+        val srv = new Gson().fromJson(new FileReader(i), RT.class);
+        if (srv.isListen()) {
+            RTServer.INSTANCE.init(getLogger(), getExecutorService(), srv.getDist());
+        }
+    }
+
+    @Override
+    public void onDisable() {
+        if (!RTServer.isClosed()) {
+            RTServer.close();
+        }
     }
 
     public void process(Map<String, ServerInfo> in) {
