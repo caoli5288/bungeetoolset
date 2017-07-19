@@ -2,6 +2,7 @@ package com.i5mc.bungee.list;
 
 import com.google.gson.Gson;
 import com.i5mc.bungee.list.rt.RT;
+import com.i5mc.bungee.list.rt.RTInfoMgr;
 import com.i5mc.bungee.list.rt.RTServer;
 import lombok.SneakyThrows;
 import lombok.val;
@@ -17,7 +18,6 @@ import net.md_5.bungee.util.CaseInsensitiveMap;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.util.Iterator;
@@ -28,6 +28,8 @@ import java.util.Map;
  */
 public class Main extends Plugin implements Listener {
 
+    public static final File FOLDER = new File("list.d");
+
     private Map<String, ServerInfo> active;
     private boolean waterfall;
 
@@ -36,10 +38,14 @@ public class Main extends Plugin implements Listener {
         waterfall = getProxy().getName().equals("Waterfall");
 
         if (!FOLDER.isDirectory()) {
-            val old = new File("server.list.d");
-            if (!(old.isDirectory() && old.renameTo(FOLDER))) {
-                if (!old.renameTo(FOLDER)) {
-                    if (!FOLDER.mkdir()) throw new RuntimeException(FOLDER + " not a directory!");
+            val prev = new File("server.list.d");
+            if (prev.isDirectory()) {
+                if (!prev.renameTo(FOLDER) && !FOLDER.mkdir()) {
+                    throw new RuntimeException(FOLDER + " not a directory!");
+                }
+            } else {
+                if (!FOLDER.mkdir()) {
+                    throw new RuntimeException(FOLDER + " not a directory!");
                 }
             }
         }
@@ -67,19 +73,22 @@ public class Main extends Plugin implements Listener {
         }
     }
 
-    public void process(Map<String, ServerInfo> in) {
-        try {
-            Files.walk(FOLDER.toPath(), 1).forEach(path -> {
-                File f = path.toFile();
-                if (FileProcessor.INSTANCE.accept(f)) {
-                    FileProcessor.INSTANCE.process(in, f);
-                } else if (RemoteProcessor.INSTANCE.accept(f)) {
-                    RemoteProcessor.INSTANCE.process(in, f);
-                }
-            });
-            getLogger().info("Invoke dynamic server list done!");
-        } catch (IOException ignore) {
+    @SneakyThrows
+    public void process(Map<String, ServerInfo> input) {
+        Files.walk(FOLDER.toPath(), 1).forEach(path -> {
+            File f = path.toFile();
+            if (FileProcessor.INSTANCE.accept(f)) {
+                FileProcessor.INSTANCE.process(input, f);
+            } else if (RemoteProcessor.INSTANCE.accept(f)) {
+                RemoteProcessor.INSTANCE.process(input, f);
+            }
+        });
+        if (!RTServer.isClosed()) {// RT update
+            for (val i : RTInfoMgr.alive()) {
+                input.put(i.getName(), i);
+            }
         }
+        getLogger().info("Invoke dynamic server list done!");
     }
 
     public void setActive(Map<String, ServerInfo> active) {
@@ -151,7 +160,5 @@ public class Main extends Plugin implements Listener {
     public boolean isWaterfall() {
         return waterfall;
     }
-
-    public static final File FOLDER = new File("list.d");
 
 }

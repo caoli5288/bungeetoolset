@@ -26,6 +26,14 @@ public enum RTInfoMgr {
         INSTANCE.map.forEach((key, group) -> group.valid());
     }
 
+    public static List<ServerInfo> alive() {
+        ImmutableList.Builder<ServerInfo> b = ImmutableList.builder();
+        INSTANCE.map.forEach((key, i) -> i.getHandle().forEach((k, info) -> {
+            if (!(info.getAlive() == -1)) b.add(info.getHandle());
+        }));
+        return b.build();
+    }
+
     public static List<ServerInfo> alive(String group) {
         val i = INSTANCE.map.get(group);
         if (!(i == null)) {
