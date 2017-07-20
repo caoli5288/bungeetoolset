@@ -22,6 +22,7 @@ import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created on 16-8-25.
@@ -32,6 +33,7 @@ public class Main extends Plugin implements Listener {
 
     private Map<String, ServerInfo> active;
     private boolean waterfall;
+    static File i;
 
     @SneakyThrows
     public void onEnable() {
@@ -55,15 +57,21 @@ public class Main extends Plugin implements Listener {
 
         if (!waterfall) getProxy().getPluginManager().registerListener(this, this);
 
-        val i = new File(getDataFolder(), "config.yml");
+        i = new File(getDataFolder(), "config.yml");
         if (!i.isFile()) {
             Files.copy(getResourceAsStream("config.yml"), i.toPath());
         }
 
         val srv = new Gson().fromJson(new FileReader(i), RT.class);
         if (srv.isListen()) {
-            RTServer.INSTANCE.init(getLogger(), getExecutorService(), srv.getDist());
+            RTServer.INSTANCE.init(getLogger(),
+                    getExecutorService(),
+                    srv.getDist(),
+                    getProxy().getScheduler().schedule(this, RTInfoMgr::valid, 5, 15, TimeUnit.SECONDS)
+            );
         }
+
+        getProxy().getPluginManager().registerCommand(this, new CommandExec());
     }
 
     @Override

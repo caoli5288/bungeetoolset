@@ -2,6 +2,7 @@ package com.i5mc.bungee.list.rt;
 
 import lombok.SneakyThrows;
 import lombok.val;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
 
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -20,12 +21,14 @@ public enum RTServer implements Runnable {
     private Logger log;
     private ExecutorService pool;
     private List<String> dist;
+    private ScheduledTask tsk;
     private ServerSocket socket;
 
-    public void init(Logger log, ExecutorService pool, List<String> dist) {
+    public void init(Logger log, ExecutorService pool, List<String> dist, ScheduledTask tsk) {
         this.log = log;
         this.pool = pool;
         this.dist = dist;
+        this.tsk = tsk;
         pool.execute(this);
     }
 
@@ -45,7 +48,10 @@ public enum RTServer implements Runnable {
                 log("<<<");
             });
         }
+    }
 
+    public void setDist(List<String> dist) {
+        this.dist = dist;
     }
 
     public static void log(Object line) {
@@ -63,7 +69,9 @@ public enum RTServer implements Runnable {
 
     @SneakyThrows
     public static void close() {
-        INSTANCE.socket.close();
+        val i = INSTANCE;
+        i.tsk.cancel();
+        i.socket.close();
     }
 
     public static List<String> getDist() {
