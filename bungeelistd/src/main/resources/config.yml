@@ -3,6 +3,6 @@
   "dist": [
     "localhost"
   ],
-  "group": "bw",
-  "debug": false
+  "group": "",
+  "debug": true
 }

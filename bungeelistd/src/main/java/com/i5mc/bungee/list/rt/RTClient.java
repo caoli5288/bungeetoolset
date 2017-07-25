@@ -21,25 +21,12 @@ public class RTClient extends JavaPlugin {
     private LinkedList<String> l;
 
     @SneakyThrows
-    public void reload() {
+    void reload() {
         RT.load(new File(getDataFolder(), "config.yml"));
-    }
-
-    @Override
-    public void onEnable() {
-        saveDefaultConfig();
-
-        reload();
         l = new LinkedList<>(RT.INSTANCE.getDist());
-
-        Bukkit.getScheduler().runTaskTimer(this, this::keepAlive, 50, 200);
     }
 
-    void keepAlive() {
-        if (l.isEmpty()) {
-            reload();
-            l = new LinkedList<>(RT.INSTANCE.getDist());
-        }
+    void sendPacket() {
         val endpoint = l.element();
         runAsync(() -> {
             try (val cli = new Socket()) {
@@ -55,6 +42,24 @@ public class RTClient extends JavaPlugin {
                 if (!l.isEmpty()) keepAlive();
             }
         });
+    }
+
+    void keepAlive() {
+        if (l.isEmpty()) {
+            reload();
+        }
+        sendPacket();
+    }
+
+    @Override
+    public void onEnable() {
+        saveDefaultConfig();
+        reload();
+
+        val group = RT.INSTANCE.getGroup();
+        if (!(group == null || group.isEmpty())) {
+            Bukkit.getScheduler().runTaskTimer(this, this::keepAlive, 50, 200);
+        }
     }
 
 }
