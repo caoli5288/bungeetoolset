@@ -1,6 +1,8 @@
 {
-  "listen": false,
+  "listen": true,
   "dist": [
     "localhost"
-  ]
+  ],
+  "group": "bw",
+  "debug": false
 }

@@ -6,7 +6,6 @@ import net.md_5.bungee.api.scheduler.ScheduledTask;
 
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,18 +17,16 @@ public enum RTServer implements Runnable {
 
     INSTANCE;
 
-    private Logger log;
-    private ExecutorService pool;
-    private List<String> dist;
-    private ScheduledTask tsk;
     private ServerSocket socket;
+    private Logger log;
+    private ScheduledTask t;
+    private ExecutorService pool;
 
-    public void init(Logger log, ExecutorService pool, List<String> dist, ScheduledTask tsk) {
-        this.log = log;
-        this.pool = pool;
-        this.dist = dist;
-        this.tsk = tsk;
-        pool.execute(this);
+    public static void init(ExecutorService pool, Logger log, ScheduledTask t) {
+        INSTANCE.log = log;
+        INSTANCE.pool = pool;
+        INSTANCE.t = t;
+        pool.execute(INSTANCE);
     }
 
     @SneakyThrows
@@ -45,17 +42,14 @@ public enum RTServer implements Runnable {
                 } catch (Exception e) {
                     log.log(Level.SEVERE, e.toString(), e);
                 }
-                log("<<<");
             });
         }
     }
 
-    public void setDist(List<String> dist) {
-        this.dist = dist;
-    }
-
     public static void log(Object line) {
-        INSTANCE.log.info("" + line);
+        if (RT.INSTANCE.isDebug()) {
+            INSTANCE.log.info("" + line);
+        }
     }
 
     public static void exec(Runnable r) {
@@ -70,12 +64,8 @@ public enum RTServer implements Runnable {
     @SneakyThrows
     public static void close() {
         val i = INSTANCE;
-        i.tsk.cancel();
+        i.t.cancel();
         i.socket.close();
-    }
-
-    public static List<String> getDist() {
-        return INSTANCE.dist;
     }
 
 }

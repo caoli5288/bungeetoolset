@@ -1,0 +1,4 @@
+name: bungeelistd
+main: com.i5mc.bungee.list.rt.RTClient
+version: ${project.version}
+author: i5mc.com

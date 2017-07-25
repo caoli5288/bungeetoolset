@@ -1,6 +1,5 @@
 package com.i5mc.bungee.list;
 
-import com.google.gson.Gson;
 import com.i5mc.bungee.list.rt.RT;
 import com.i5mc.bungee.list.rt.RTServer;
 import lombok.val;
@@ -8,7 +7,6 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
 
-import java.io.FileReader;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -28,10 +26,9 @@ public class CommandExec extends Command {
         RT_RELOAD((p, itr) -> {
             if (RTServer.isClosed()) throw new IllegalStateException("not running");
             try {
-                val srv = new Gson().fromJson(new FileReader(Main.i), RT.class);
-                if (srv.isListen()) {
-                    RTServer.INSTANCE.setDist(srv.getDist());
-                } else {
+                RT.load(Main.i);
+                if (!RT.INSTANCE.isListen()) {
+                    RTServer.log("RT server shutdown");
                     RTServer.close();
                 }
             } catch (Exception e) {

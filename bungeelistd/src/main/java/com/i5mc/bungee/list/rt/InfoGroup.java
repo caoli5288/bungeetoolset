@@ -48,7 +48,7 @@ public class InfoGroup {
     }
 
     private Info b(String key, InetSocketAddress remote) {
-        val i = new BungeeServerInfo(name + "-" + key.hashCode(), remote, "", false);
+        val i = new BungeeServerInfo(name + "-" + Integer.toHexString(key.hashCode()), remote, "", false);
         BungeeCord.getInstance().getServers().put(i.getName(), i);
         return new Info(i, -1);
     }

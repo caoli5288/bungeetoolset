@@ -34,19 +34,20 @@ public class Heartbeat implements IDataPacket {
 
     @SneakyThrows
     public void exec(Socket so) {
-        val d = new Dist(group, host, port);
-        for (val dist : RTServer.getDist()) {
-            RTServer.exec(() -> send(d, dist));
+        val packet = new Dist(group, host, port);
+        for (val l : RT.INSTANCE.getDist()) {
+            RTServer.exec(() -> send(packet, l));
         }
         RTServer.log(this);
     }
 
     @SneakyThrows
     private void send(Dist packet, String to) {
-        val cli = new Socket();
-        cli.setSoTimeout(4000);
-        cli.connect(new InetSocketAddress(to, RT.PORT));
-        Protocol.send(cli, packet);
+        try (val cli = new Socket()) {
+            cli.setSoTimeout(4000);
+            cli.connect(new InetSocketAddress(to, RT.PORT));
+            Protocol.send(cli, packet);
+        }
     }
 
     @SneakyThrows

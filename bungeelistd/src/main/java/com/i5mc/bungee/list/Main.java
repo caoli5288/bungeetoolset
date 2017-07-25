@@ -1,6 +1,5 @@
 package com.i5mc.bungee.list;
 
-import com.google.gson.Gson;
 import com.i5mc.bungee.list.rt.RT;
 import com.i5mc.bungee.list.rt.RTInfoMgr;
 import com.i5mc.bungee.list.rt.RTServer;
@@ -17,7 +16,6 @@ import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.util.CaseInsensitiveMap;
 
 import java.io.File;
-import java.io.FileReader;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.util.Iterator;
@@ -57,18 +55,22 @@ public class Main extends Plugin implements Listener {
 
         if (!waterfall) getProxy().getPluginManager().registerListener(this, this);
 
+        if (!getDataFolder().isDirectory() && !getDataFolder().mkdir()) {
+            throw new IllegalStateException("data folder");
+        }
+
         i = new File(getDataFolder(), "config.yml");
         if (!i.isFile()) {
             Files.copy(getResourceAsStream("config.yml"), i.toPath());
         }
 
-        val srv = new Gson().fromJson(new FileReader(i), RT.class);
-        if (srv.isListen()) {
-            RTServer.INSTANCE.init(getLogger(),
-                    getExecutorService(),
-                    srv.getDist(),
+        RT.load(i);
+        if (RT.INSTANCE.isListen()) {
+            RTServer.init(getExecutorService(),
+                    getLogger(),
                     getProxy().getScheduler().schedule(this, RTInfoMgr::valid, 5, 15, TimeUnit.SECONDS)
             );
+            getLogger().info("RT server listen on :" + RT.PORT);
         }
 
         getProxy().getPluginManager().registerCommand(this, new CommandExec());
@@ -77,6 +79,7 @@ public class Main extends Plugin implements Listener {
     @Override
     public void onDisable() {
         if (!RTServer.isClosed()) {
+            getLogger().info("RT server shutdown");
             RTServer.close();
         }
     }
