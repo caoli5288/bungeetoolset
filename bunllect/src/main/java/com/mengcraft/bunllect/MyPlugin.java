@@ -1,6 +1,13 @@
 package com.mengcraft.bunllect;
 
 import lombok.val;
+import org.bukkit.event.Event;
+import org.bukkit.event.EventException;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.EventExecutor;
+import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -11,7 +18,7 @@ import java.util.Properties;
 /**
  * Created on 17-4-25.
  */
-public class MyPlugin extends JavaPlugin {
+public class MyPlugin extends JavaPlugin implements Listener, EventExecutor {
 
     static ConnectionFactory conn;
 
@@ -35,7 +42,15 @@ public class MyPlugin extends JavaPlugin {
         conn.setUser(p.getProperty("bunllect.jdbc.user"));
         conn.setPassword(p.getProperty("bunllect.jdbc.password"));
 
-        val query = new Query(this);
+        val query = new Var(this);
         query.hook();
+
+        PlayerQuitEvent.getHandlerList().register(new RegisteredListener(this, this, EventPriority.NORMAL, this, false));
+    }
+
+    @Override
+    public void execute(Listener l, Event event) throws EventException {
+        val evt = ((PlayerQuitEvent) event);
+        TimePool.quit(evt.getPlayer());
     }
 }

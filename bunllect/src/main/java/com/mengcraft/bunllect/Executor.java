@@ -11,6 +11,7 @@ import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.netty.ChannelWrapper;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,7 +20,7 @@ import java.util.Map;
  */
 public class Executor implements Listener {
 
-    private final Map<String, Long> time = new HashMap<>();
+    private final Map<String, Timestamp> time = new HashMap<>();
     private final String host;
 
     public Executor(String host) {
@@ -28,7 +29,7 @@ public class Executor implements Listener {
 
     @EventHandler
     public void handle(PostLoginEvent event) {
-        time.put(event.getPlayer().getName(), System.currentTimeMillis());
+        time.put(event.getPlayer().getName(), $.now());
     }
 
     @EventHandler
@@ -59,11 +60,11 @@ public class Executor implements Listener {
     }
 
     private int getLife(String name) {
-        Long remove = time.remove(name);
+        Timestamp remove = time.remove(name);
         if (remove == null) {
             return 0;
         }
-        return Math.toIntExact((System.currentTimeMillis() - remove) / 1000);
+        return Math.toIntExact((System.currentTimeMillis() - remove.getTime()) / 1000);
     }
 
 }

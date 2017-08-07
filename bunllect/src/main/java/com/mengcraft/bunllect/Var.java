@@ -7,9 +7,9 @@ import org.bukkit.plugin.Plugin;
 /**
  * Created on 17-4-25.
  */
-public class Query extends EZPlaceholderHook {
+public class Var extends EZPlaceholderHook {
 
-    public Query(Plugin plugin) {
+    public Var(Plugin plugin) {
         super(plugin, "bunllect");
     }
 
@@ -21,12 +21,14 @@ public class Query extends EZPlaceholderHook {
     enum Lab implements IExec {
 
         ONTIME(p -> {
-            int time = TimePool.INSTANCE.get(p);
+            int time = TimePool.INSTANCE.get(p).getLeft();
             if (time > 1) return TimeHelper.parse(time);
             return "无数据";
         }),
 
-        TIME(p -> "" + TimePool.INSTANCE.get(p));
+        TIME(p -> "" + TimePool.INSTANCE.get(p).getLeft()),
+
+        TODAY(p -> "" + TimePool.INSTANCE.get(p).getRight());
 
         final IExec i;
 
