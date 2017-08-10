@@ -1,8 +1,8 @@
 {
   "listen": true,
+  "log": true,
   "dist": [
     "localhost"
   ],
-  "group": "",
-  "debug": true
+  "group": ""
 }

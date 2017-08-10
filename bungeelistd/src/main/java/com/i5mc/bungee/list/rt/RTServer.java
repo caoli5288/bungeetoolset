@@ -38,7 +38,7 @@ public enum RTServer implements Runnable {
             exec(() -> {
                 log(">>> " + i.getInetAddress().getHostAddress());
                 try (val cli = i) {
-                    Protocol.input(cli);
+                    Protocol.input(cli).exec(i);
                 } catch (Exception e) {
                     log.log(Level.SEVERE, e.toString(), e);
                 }
@@ -47,7 +47,7 @@ public enum RTServer implements Runnable {
     }
 
     public static void log(Object line) {
-        if (RT.INSTANCE.isDebug()) {
+        if (RT.INSTANCE.isLog()) {
             INSTANCE.log.info("" + line);
         }
     }

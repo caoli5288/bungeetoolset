@@ -34,7 +34,6 @@ public enum Protocol {
         try {
             val p = valueOf(input.readUTF()).fct.get();
             p.input(input);
-            p.exec(so);
             return p;
         } catch (IllegalArgumentException ign) {
         }

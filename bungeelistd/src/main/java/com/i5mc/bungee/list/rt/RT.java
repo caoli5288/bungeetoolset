@@ -17,9 +17,10 @@ public class RT {
     public static final int PORT = 22275;
 
     private boolean listen;
-    private List<String> dist;
+    private boolean log;
+
     private String group;
-    private boolean debug;
+    private List<String> dist;
 
     @SneakyThrows
     public static void load(File l) {
@@ -29,7 +30,7 @@ public class RT {
     void load(RT l) {
         listen = l.listen;
         dist = l.dist;
-        debug = l.debug;
+        log = l.log;
         group = l.group;
     }
 
