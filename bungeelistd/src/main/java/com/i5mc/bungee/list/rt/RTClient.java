@@ -1,5 +1,6 @@
 package com.i5mc.bungee.list.rt;
 
+import com.google.common.collect.ImmutableList;
 import com.i5mc.bungee.list.rt.protocol.Heartbeat;
 import com.i5mc.bungee.list.rt.protocol.Pull;
 import com.i5mc.bungee.list.rt.protocol.PullReq;
@@ -40,7 +41,7 @@ public class RTClient extends JavaPlugin {
             l.poll();
             if (!l.isEmpty()) return pull(group);
         }
-        return null;
+        return ImmutableList.of();
     }
 
     @SneakyThrows
