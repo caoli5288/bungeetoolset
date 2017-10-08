@@ -18,13 +18,13 @@ import java.util.regex.Pattern;
  */
 public class FwdListener extends Plugin implements Listener {
 
-    interface Exp {
+    interface Expr {
 
         boolean match(String key);
     }
 
-    public static final Map<String, Exp> MAP = new HashMap<>();
-    public static final Exp NIL = i -> true;
+    public static final Map<String, Expr> MAP = new HashMap<>();
+    public static final Expr NIL = i -> true;
 
     @Override
     public void onEnable() {
@@ -34,7 +34,8 @@ public class FwdListener extends Plugin implements Listener {
 
     @EventHandler
     public void handle(PluginMessageEvent event) {
-        if (event.getReceiver().getClass() == ServerConnection.class) return;
+        val recv = event.getReceiver();// NPE here. possible bungeecord's bug
+        if (recv == null || recv.getClass() == ServerConnection.class) return;
         if (event.getTag().equals(ChannelMessage.CHANNEL)) {
             event.setCancelled(true);
             try {
