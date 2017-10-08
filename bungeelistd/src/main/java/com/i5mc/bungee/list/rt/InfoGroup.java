@@ -32,6 +32,7 @@ public class InfoGroup {
             synchronized (all) {
                 all.put(info.getHandle().getName(), info.getHandle());
             }
+            RTServer.log(info.getHandle().getName() + info.getHandle().getAddress() + " online");
         }
         info.setAlive(1);
     }
@@ -43,6 +44,7 @@ public class InfoGroup {
                 synchronized (all) {
                     all.remove(info.getHandle().getName());
                 }
+                RTServer.log(info.getHandle().getName() + info.getHandle().getAddress() + " offline");
             }
         });
     }

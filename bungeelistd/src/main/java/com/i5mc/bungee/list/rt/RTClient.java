@@ -47,8 +47,7 @@ public class RTClient extends JavaPlugin {
     @SneakyThrows
     Socket conn(String endpoint) {
         val cli = new Socket();
-        cli.setSoTimeout(4000);
-        cli.connect(new InetSocketAddress(endpoint, RT.PORT));
+        cli.connect(new InetSocketAddress(endpoint, RT.PORT), 4000);
         return cli;
     }
 
