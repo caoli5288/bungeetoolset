@@ -23,8 +23,8 @@ public class CommandExec extends Command {
 
     private enum Exec {
 
-        RT_RELOAD((p, itr) -> {
-            if (RTServer.isClosed()) throw new IllegalStateException("not running");
+        RT_DIST_RELOAD((p, itr) -> {
+            if (!RT.INSTANCE.isListen()) throw new IllegalStateException("not running");
             try {
                 RT.load(Main.i);
                 if (!RT.INSTANCE.isListen()) {

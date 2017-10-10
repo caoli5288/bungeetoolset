@@ -9,7 +9,8 @@ import lombok.val;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.net.Socket;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.function.Supplier;
 
 /**
@@ -29,23 +30,19 @@ public enum Protocol {
     }
 
     @SneakyThrows
-    public static IDataPacket input(Socket so) {
-        val input = new DataInputStream(so.getInputStream());
-        try {
-            val p = valueOf(input.readUTF()).fct.get();
-            p.input(input);
-            return p;
-        } catch (IllegalArgumentException ign) {
-        }
-        return null;
+    public static IDataPacket input(InputStream st) {
+        val input = new DataInputStream(st);
+        val p = valueOf(input.readUTF()).fct.get();
+        p.input(input);
+        return p;
     }
 
     @SneakyThrows
-    public static void send(Socket so, IDataPacket p) {
-        val out = new DataOutputStream(so.getOutputStream());
-        out.writeUTF(p.protocol());
-        p.output(out);
-        out.flush();
+    public static void output(OutputStream st, IDataPacket out) {
+        val buf = new DataOutputStream(st);
+        buf.writeUTF(out.protocol());
+        out.output(buf);
+        buf.flush();
     }
 
 }

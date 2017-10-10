@@ -14,10 +14,19 @@ import java.util.List;
 @Data
 public class RT {
 
+    @Data
+    public static class Discover {
+
+        private String host;
+        private int port;
+    }
+
     public static final int PORT = 22275;
 
     private boolean listen;
     private boolean log;
+
+    private Discover discover;
 
     private String group;
     private List<String> dist;
@@ -32,6 +41,7 @@ public class RT {
         dist = l.dist;
         log = l.log;
         group = l.group;
+        discover = l.discover;
     }
 
     public static final RT INSTANCE = new RT();

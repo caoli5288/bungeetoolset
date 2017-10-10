@@ -32,11 +32,12 @@ public class Pull implements IDataPacket {
     }
 
     @Override
+    @SneakyThrows
     public void exec(Socket so) {
         val alive = RTInfoMgr.alive(group);
         List<PullReq.Req> l = ListHelper.collect(alive, i -> new PullReq.Req(i.getName(), i.getAddress()));
         val p = new PullReq(l);
-        Protocol.send(so, p);
+        Protocol.output(so.getOutputStream(), p);
         RTServer.log(this);
     }
 

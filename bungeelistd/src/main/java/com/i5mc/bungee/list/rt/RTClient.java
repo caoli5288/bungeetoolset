@@ -1,6 +1,7 @@
 package com.i5mc.bungee.list.rt;
 
 import com.google.common.collect.ImmutableList;
+import com.i5mc.bungee.list.rt.protocol.Dist;
 import com.i5mc.bungee.list.rt.protocol.Heartbeat;
 import com.i5mc.bungee.list.rt.protocol.Pull;
 import com.i5mc.bungee.list.rt.protocol.PullReq;
@@ -9,11 +10,14 @@ import lombok.val;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
 
 import static java.util.concurrent.CompletableFuture.runAsync;
 
@@ -23,6 +27,7 @@ import static java.util.concurrent.CompletableFuture.runAsync;
 public class RTClient extends JavaPlugin {
 
     private LinkedList<String> l;
+    private RTDiscover discover;
 
     @SneakyThrows
     void reload() {
@@ -34,8 +39,8 @@ public class RTClient extends JavaPlugin {
         val endpoint = l.element();
         try (val cli = conn(endpoint)) {
             val p = new Pull(group);
-            Protocol.send(cli, p);
-            val receive = Protocol.input(cli);
+            Protocol.output(cli.getOutputStream(), p);
+            val receive = Protocol.input(cli.getInputStream());
             return ((PullReq) receive).getAlive();
         } catch (Exception ign) {
             l.poll();
@@ -51,26 +56,44 @@ public class RTClient extends JavaPlugin {
         return cli;
     }
 
+    @SneakyThrows
     void sendAlive() {
-        val endpoint = l.element();
-        runAsync(() -> {
-            try (val cli = conn(endpoint)) {
-                val p = new Heartbeat(RT.INSTANCE.getGroup(), cli.getLocalAddress().getHostAddress(), Bukkit.getPort());
-                Protocol.send(cli, p);
-            } catch (Exception ign) {
-                if (RT.INSTANCE.isLog()) {
-                    getLogger().warning("RT server " + endpoint + " refused");
+        if (discover == null) {
+            val endpoint = l.element();
+            runAsync(() -> {
+                try (val cli = conn(endpoint)) {
+                    val p = new Heartbeat(RT.INSTANCE.getGroup(), cli.getLocalAddress().getHostAddress(), Bukkit.getPort());
+                    Protocol.output(cli.getOutputStream(), p);
+                    log(p);
+                } catch (Exception ign) {
+                    if (RT.INSTANCE.isLog()) {
+                        getLogger().warning("RT server " + endpoint + " refused");
+                    }
+                    l.poll();
+                    if (!l.isEmpty()) keepAlive();
                 }
-                l.poll();
-                if (!l.isEmpty()) keepAlive();
-            }
-        });
+            });
+        } else {
+            byte[] ch = RTDiscover.PUB.getBytes("utf-8");
+            runAsync(() -> {
+                val cli = discover.getPool().getResource();
+                val p = new Dist(RT.INSTANCE.getGroup(), discover.getLocalhost(), Bukkit.getPort());
+                val buf = new ByteArrayOutputStream();
+                Protocol.output(buf, p);
+                cli.publish(ch, buf.toByteArray());
+                log(p);
+            });
+        }
+    }
+
+    public void log(Object any) {
+        if (RT.INSTANCE.isLog()) {
+            getLogger().log(Level.INFO, "" + any);
+        }
     }
 
     void keepAlive() {
-        if (l.isEmpty()) {
-            reload();
-        }
+        if (discover == null && l.isEmpty()) reload();
         sendAlive();
     }
 
@@ -81,6 +104,17 @@ public class RTClient extends JavaPlugin {
 
         val group = RT.INSTANCE.getGroup();
         if (!(group == null || group.isEmpty())) {
+            val cover = RT.INSTANCE.getDiscover();
+            if (!(cover == null)) {
+                val discover = new RTDiscover(cover);
+                try {
+                    if (discover.init()) {
+                        RTClient.this.discover = discover;
+                        getLogger().log(Level.INFO, "Discover service okay");
+                    }
+                } catch (IOException e) {
+                }
+            }
             Bukkit.getScheduler().runTaskTimer(this, this::keepAlive, 50, 200);
         }
     }

@@ -4,5 +4,9 @@
   "dist": [
     "localhost"
   ],
+  "discover": {
+    "host": "",
+    "port": 6379
+  },
   "group": ""
 }

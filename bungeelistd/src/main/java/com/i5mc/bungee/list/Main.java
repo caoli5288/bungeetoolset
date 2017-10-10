@@ -78,10 +78,8 @@ public class Main extends Plugin implements Listener {
 
     @Override
     public void onDisable() {
-        if (!RTServer.isClosed()) {
-            getLogger().info("RT server shutdown");
-            RTServer.close();
-        }
+        getLogger().info("RT server shutdown");
+        RTServer.close();
     }
 
     @SneakyThrows
@@ -94,7 +92,7 @@ public class Main extends Plugin implements Listener {
                 RemoteProcessor.INSTANCE.process(input, f);
             }
         });
-        if (!RTServer.isClosed()) {// RT update
+        if (RT.INSTANCE.isListen()) {// RT update
             for (val i : RTInfoMgr.alive()) {
                 input.put(i.getName(), i);
             }

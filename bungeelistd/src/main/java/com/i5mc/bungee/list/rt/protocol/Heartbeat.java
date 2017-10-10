@@ -2,17 +2,14 @@ package com.i5mc.bungee.list.rt.protocol;
 
 import com.i5mc.bungee.list.rt.IDataPacket;
 import com.i5mc.bungee.list.rt.Protocol;
-import com.i5mc.bungee.list.rt.RT;
 import com.i5mc.bungee.list.rt.RTServer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.val;
 
 import java.io.DataInput;
 import java.io.DataOutput;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 
 /**
@@ -34,20 +31,7 @@ public class Heartbeat implements IDataPacket {
 
     @SneakyThrows
     public void exec(Socket so) {
-        val packet = new Dist(group, host, port);
-        for (val l : RT.INSTANCE.getDist()) {
-            RTServer.exec(() -> send(packet, l));
-        }
-        RTServer.log(this);
-    }
-
-    @SneakyThrows
-    private void send(Dist packet, String to) {
-        try (val cli = new Socket()) {
-            cli.setSoTimeout(4000);
-            cli.connect(new InetSocketAddress(to, RT.PORT));
-            Protocol.send(cli, packet);
-        }
+        RTServer.distribute(new Dist(group, host, port));
     }
 
     @SneakyThrows
