@@ -19,12 +19,12 @@ public enum ZoneMgr {
     INST;
 
     private final Cache<String, Zone> mapping = CacheBuilder.newBuilder()
-            .expireAfterWrite(5, TimeUnit.MINUTES)
+            .expireAfterWrite(1, TimeUnit.MINUTES)
             .removalListener(notice -> invalid((Zone) notice.getValue()))
             .build();
 
     private final Cache<String, Zone> sl = CacheBuilder.newBuilder()
-            .expireAfterWrite(1, TimeUnit.HOURS)
+            .expireAfterWrite(5, TimeUnit.MINUTES)
             .build();
 
     private final List<Pattern> all = new ArrayList<>();
@@ -47,12 +47,17 @@ public enum ZoneMgr {
         });
     }
 
-    @SneakyThrows
     public void updateAll() {
+        updateAll(null);
+    }
+
+    @SneakyThrows
+    public void updateAll(CommandSender who) {
         mapping.invalidateAll();
         for (Pattern p : all) {
             mapping.get(p.pattern(), () -> Zone.build(p));
         }
+        if (!(who == null)) who.sendMessage("Okay");
     }
 
     public void add(Pattern pattern) {
@@ -60,7 +65,13 @@ public enum ZoneMgr {
     }
 
     public void sendAll(CommandSender who) {
-        who.sendMessage(String.valueOf(mapping));
+        who.sendMessage(String.valueOf(mapping.asMap().values()));
+    }
+
+    public void sendHead(CommandSender who) {
+        for (Zone zone : mapping.asMap().values()) {
+            who.sendMessage("Zone(pattern=\"" + zone.getPattern() + "\", head=\"" + zone.alive().poll() + "\")");
+        }
     }
 
 }

@@ -52,15 +52,20 @@ public enum RTServer implements Runnable {
         socket = new ServerSocket();
         socket.bind(new InetSocketAddress(RT.PORT));
         while (!socket.isClosed()) {
-            val i = socket.accept();
-            exec(() -> {
-                log(">>> " + i.getInetAddress().getHostAddress());
-                try (val cli = i) {
-                    Protocol.input(cli.getInputStream()).exec(i);
-                } catch (Exception e) {
-                    log.log(Level.SEVERE, e.toString(), e);
-                }
-            });
+            try (val i = socket.accept()) {
+                exec(() -> {
+                    log(">>> " + i.getInetAddress().getHostAddress());
+                    try {
+                        Protocol.input(i.getInputStream()).exec(i);
+                    } catch (IOException ign) {
+                        ;
+                    }
+                });
+            } catch (IOException ign) {
+                ;
+            } catch (Exception ign) {
+                log.log(Level.SEVERE, ign.toString(), ign);
+            }
         }
     }
 

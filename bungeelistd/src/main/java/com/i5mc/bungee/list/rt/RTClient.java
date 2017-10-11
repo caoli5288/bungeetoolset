@@ -76,12 +76,15 @@ public class RTClient extends JavaPlugin {
         } else {
             byte[] ch = RTDiscover.PUB.getBytes("utf-8");
             runAsync(() -> {
-                val cli = discover.getPool().getResource();
-                val p = new Dist(RT.INSTANCE.getGroup(), discover.getLocalhost(), Bukkit.getPort());
-                val buf = new ByteArrayOutputStream();
-                Protocol.output(buf, p);
-                cli.publish(ch, buf.toByteArray());
-                log(p);
+                try (val cli = discover.getPool().getResource()) {
+                    val p = new Dist(RT.INSTANCE.getGroup(), discover.getLocalhost(), Bukkit.getPort());
+                    val buf = new ByteArrayOutputStream();
+                    Protocol.output(buf, p);
+                    cli.publish(ch, buf.toByteArray());
+                    log(p);
+                } catch (Exception e) {
+                    log(e);
+                }
             });
         }
     }

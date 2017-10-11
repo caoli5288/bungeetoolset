@@ -27,6 +27,10 @@ public class Main extends Plugin {
         inst = this;
         val conf = new File(getDataFolder(), "config.json");
         if (!conf.exists()) {
+            if (!getDataFolder().isDirectory() && !getDataFolder().mkdir()) {
+                throw new IllegalStateException("data folder");
+            }
+
             Files.copy(getResourceAsStream("config.json"), conf.toPath());
         }
 
@@ -35,7 +39,10 @@ public class Main extends Plugin {
             ZoneMgr.INST.add(Pattern.compile(l.getAsString()));
         }
 
-        getProxy().getScheduler().schedule(this, ZoneMgr.INST::updateAll, 30, TimeUnit.SECONDS);
+        getProxy().getPluginManager().registerCommand(this, new MainCommand());
+        getProxy().getPluginManager().registerListener(this, new MainListener());
+
+        getProxy().getScheduler().schedule(this, ZoneMgr.INST::updateAll, 15, TimeUnit.SECONDS);
     }
 
     public static void log(Object message) {

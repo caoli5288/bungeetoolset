@@ -10,7 +10,7 @@ import lombok.val;
 import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -57,7 +57,7 @@ public class Zone {
         connect(p, callback, new AtomicInteger(size()));
     }
 
-    public Info head() {
+    public Info peek() {
         return queue.peek();
     }
 
@@ -73,7 +73,7 @@ public class Zone {
     }
 
     public Queue<String> alive() {
-        LinkedList<String> out = new LinkedList<>();
+        Queue<String> out = new PriorityQueue<>();
         for (val info : queue) {
             if (!(info.getValue() == Integer.MAX_VALUE)) {
                 out.add(info.getServerInfo().getName());

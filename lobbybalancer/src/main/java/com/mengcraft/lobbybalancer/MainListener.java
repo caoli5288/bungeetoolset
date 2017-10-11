@@ -2,7 +2,7 @@ package com.mengcraft.lobbybalancer;
 
 import lombok.val;
 import net.md_5.bungee.UserConnection;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.event.ServerConnectedEvent;
@@ -23,18 +23,22 @@ public class MainListener implements Listener {
 
     @EventHandler
     public void handle(ServerConnectEvent event) {
-        val player = ((UserConnection) event.getPlayer());
-        val id = player.getUniqueId();
-        if (locking.containsKey(id)) return;
+        val id = event.getPlayer().getUniqueId();
+        if (locking.containsKey(id)) {
+            return;
+        }
 
         val old = event.getTarget();
         val zone = ZoneMgr.INST.select(old);
-        if (zone == Zone.NIL) return;
+        if (zone == Zone.NIL) {
+            return;
+        }
 
         locking.put(id, "");
+        val player = ((UserConnection) event.getPlayer());
         if (player.getServer() == null) {
             player.setServerJoinQueue(zone.alive());
-            val head = zone.head();
+            val head = zone.peek();
             if (!(head == null)) {
                 event.setTarget(head.getServerInfo());
             }
@@ -53,26 +57,32 @@ public class MainListener implements Listener {
         Main.log("Redirect player " + zone.getPattern().pattern());
     }
 
-    public void unlock(ProxiedPlayer p, boolean b) {
-        locking.remove(p.getUniqueId());
-        val removal = join.remove(p.getUniqueId());
-        val info = p.getServer().getInfo();
-        if (!(removal == null) && b && InfoMgr.INST.exist(info)) {
-            val i = InfoMgr.INST.get(info);
-            if (i.incValue() >= -1) {
-                i.update(() -> ZoneMgr.INST.select(info).queue(i));
-            }
+    public void unlock(UUID id, Server server) {
+        locking.remove(id);
+        val removal = join.remove(id);
+        if (removal == null || server == null) {
+            return;
+        }
+
+        val info = server.getInfo();
+        if (!InfoMgr.INST.exist(info)) {
+            return;
+        }
+
+        val i = InfoMgr.INST.get(info);
+        if (i.incValue() >= -1) {
+            i.update(() -> ZoneMgr.INST.select(info).queue(i));
         }
     }
 
     @EventHandler
     public void handle(ServerConnectedEvent event) {
-        unlock(event.getPlayer(), true);
+        unlock(event.getPlayer().getUniqueId(), event.getServer());
     }
 
     @EventHandler
     public void handle(PlayerDisconnectEvent event) {
-        unlock(event.getPlayer(), false);
+        unlock(event.getPlayer().getUniqueId(), null);
     }
 
 }
