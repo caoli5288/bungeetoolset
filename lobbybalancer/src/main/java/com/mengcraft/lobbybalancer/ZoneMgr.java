@@ -3,7 +3,6 @@ package com.mengcraft.lobbybalancer;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.SneakyThrows;
-import lombok.val;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.config.ServerInfo;
 
@@ -21,37 +20,47 @@ public enum ZoneMgr {
 
     private final Cache<String, Zone> mapping = CacheBuilder.newBuilder()
             .expireAfterWrite(5, TimeUnit.MINUTES)
+            .removalListener(notice -> invalid((Zone) notice.getValue()))
+            .build();
+
+    private final Cache<String, Zone> sl = CacheBuilder.newBuilder()
+            .expireAfterWrite(1, TimeUnit.HOURS)
             .build();
 
     private final List<Pattern> all = new ArrayList<>();
 
+    public void invalid(Zone zone) {
+        for (Info i : zone.getQueue()) {
+            sl.invalidate(i.getServerInfo().getName());
+        }
+    }
+
     @SneakyThrows
     public Zone select(ServerInfo info) {
-        val itr = all.iterator();
-        while (itr.hasNext()) {
-            Pattern p = itr.next();
-            if (p.matcher(info.getName()).matches()) {
-                return mapping.get(p.pattern(), () -> Zone.build(p));
+        return sl.get(info.getName(), () -> {
+            for (Pattern p : all) {
+                if (p.matcher(info.getName()).matches()) {
+                    return mapping.get(p.pattern(), () -> Zone.build(p));
+                }
             }
-        }
-        return null;
+            return Zone.NIL;
+        });
     }
 
     @SneakyThrows
     public void updateAll() {
         mapping.invalidateAll();
         for (Pattern p : all) {
-            Zone zone = mapping.get(p.pattern(), () -> Zone.build(p));
-            Main.log("Fetch " + zone.size() + " server(s) for pattern " + p.pattern());
+            mapping.get(p.pattern(), () -> Zone.build(p));
         }
-    }
-
-    public void sendAll(CommandSender who) {
-        who.sendMessage(String.valueOf(mapping));
     }
 
     public void add(Pattern pattern) {
         all.add(pattern);
+    }
+
+    public void sendAll(CommandSender who) {
+        who.sendMessage(String.valueOf(mapping));
     }
 
 }

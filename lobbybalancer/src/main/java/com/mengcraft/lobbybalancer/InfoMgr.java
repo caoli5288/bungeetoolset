@@ -22,4 +22,8 @@ public enum InfoMgr {
             return oldValue;
         });
     }
+
+    public boolean exist(ServerInfo serverInfo) {
+        return mapping.containsKey(serverInfo.getName());
+    }
 }
