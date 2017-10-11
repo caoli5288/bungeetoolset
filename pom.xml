@@ -13,6 +13,7 @@
         <module>stat</module>
         <module>slashlimit</module>
         <module>i5channel</module>
+        <module>lobbybalancer</module>
     </modules>
     <packaging>pom</packaging>
 

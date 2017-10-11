@@ -1,0 +1,6 @@
+{
+  "pattern": [
+    "lobby-\\d+",
+    "hub-\\d+"
+  ]
+}

@@ -1,0 +1,4 @@
+name: lobbybalancer
+main: com.mengcraft.lobbybalancer.Main
+version: ${project.version}
+author: caoli528@gmail.com
