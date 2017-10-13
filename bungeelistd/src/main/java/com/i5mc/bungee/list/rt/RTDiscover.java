@@ -9,8 +9,6 @@ import redis.clients.jedis.JedisPool;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -34,11 +32,11 @@ public class RTDiscover extends BinaryJedisPubSub {
     public boolean init() throws IOException {
         val host = discover.getHost();
         if (host == null || host.isEmpty()) return false;
-        val cli = new Socket();
-        cli.connect(new InetSocketAddress(host, discover.getPort()));
-        localhost = cli.getLocalAddress().getHostAddress();
-        cli.close();
+
         pool = new JedisPool(host, discover.getPort());
+        try (val cli = pool.getResource()) {
+            localhost = cli.getClient().getSocket().getLocalAddress().getHostAddress();
+        }
         return true;
     }
 
