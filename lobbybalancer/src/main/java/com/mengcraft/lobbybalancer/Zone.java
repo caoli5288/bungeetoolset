@@ -1,15 +1,10 @@
 package com.mengcraft.lobbybalancer;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.val;
+import lombok.*;
 import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
+import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
@@ -57,10 +52,6 @@ public class Zone {
         connect(p, callback, new AtomicInteger(size()));
     }
 
-    public Info peek() {
-        return queue.peek();
-    }
-
     public void queue(Info add) {
         while (queue.remove(add)) {
             ;
@@ -73,8 +64,10 @@ public class Zone {
     }
 
     public Queue<String> alive() {
-        Queue<String> out = new PriorityQueue<>();
-        for (val info : queue) {
+        val itr = new PriorityQueue<Info>(queue);
+        val out = new LinkedList<String>();
+        while (!itr.isEmpty()) {
+            Info info = itr.poll();
             if (!(info.getValue() == Integer.MAX_VALUE)) {
                 out.add(info.getServerInfo().getName());
             }
@@ -86,7 +79,7 @@ public class Zone {
         Zone zone = new Zone(pattern);
         BungeeCord.getInstance().getServers().forEach((name, serverInfo) -> {
             if (pattern.matcher(name).matches()) {
-                Info info = InfoMgr.INST.get(serverInfo);
+                Info info = InfoMgr.INST.mapping(serverInfo);
                 if (info.getRef() == 0 || info.getValue() == Integer.MAX_VALUE) {
                     info.update(() -> zone.queue(info));
                 } else {

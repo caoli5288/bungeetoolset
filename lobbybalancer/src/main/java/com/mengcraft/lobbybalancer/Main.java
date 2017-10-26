@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
@@ -41,8 +40,6 @@ public class Main extends Plugin {
 
         getProxy().getPluginManager().registerCommand(this, new MainCommand());
         getProxy().getPluginManager().registerListener(this, new MainListener());
-
-        getProxy().getScheduler().schedule(this, ZoneMgr.INST::updateAll, 15, TimeUnit.SECONDS);
     }
 
     public static void log(Object message) {

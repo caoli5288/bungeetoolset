@@ -70,7 +70,11 @@ public enum RTServer implements Runnable {
     }
 
     public static void log(Object line) {
-        if (RT.INSTANCE.isLog()) {
+        log(line, false);
+    }
+
+    public static void log(Object line, boolean force) {
+        if (force || RT.INSTANCE.isLog()) {
             INSTANCE.log.info("" + line);
         }
     }

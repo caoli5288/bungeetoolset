@@ -14,16 +14,20 @@ public enum InfoMgr {
 
     private final Map<String, Info> mapping = new ConcurrentHashMap<>();
 
-    public Info get(ServerInfo serverInfo) {
+    public Info mapping(ServerInfo serverInfo) {
         return mapping.compute(serverInfo.getName(), (key, oldValue) -> {
             if (oldValue == null || !oldValue.getServerInfo().equals(serverInfo)) {
-                return Info.of(serverInfo);
+                return Info.build(serverInfo);
             }
             return oldValue;
         });
     }
 
-    public boolean exist(ServerInfo serverInfo) {
+    public Info getByName(String name) {
+        return mapping.get(name);
+    }
+
+    public boolean check(ServerInfo serverInfo) {
         return mapping.containsKey(serverInfo.getName());
     }
 }

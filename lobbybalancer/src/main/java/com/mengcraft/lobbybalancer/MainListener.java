@@ -2,6 +2,7 @@ package com.mengcraft.lobbybalancer;
 
 import lombok.val;
 import net.md_5.bungee.UserConnection;
+import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.ServerConnectEvent;
@@ -10,6 +11,7 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
 import java.util.Map;
+import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,10 +39,11 @@ public class MainListener implements Listener {
         locking.put(id, "");
         val player = ((UserConnection) event.getPlayer());
         if (player.getServer() == null) {
-            player.setServerJoinQueue(zone.alive());
-            val head = zone.peek();
+            Queue<String> alive = zone.alive();
+            player.setServerJoinQueue(alive);
+            val head = alive.peek();
             if (!(head == null)) {
-                event.setTarget(head.getServerInfo());
+                event.setTarget(InfoMgr.INST.getByName(head).getServerInfo());
             }
             join.put(id, "");
         } else {
@@ -58,20 +61,25 @@ public class MainListener implements Listener {
     }
 
     public void unlock(UUID id, Server server) {
+        String removal = join.remove(id);
         locking.remove(id);
-        val removal = join.remove(id);
+
         if (removal == null || server == null) {
             return;
         }
 
-        val info = server.getInfo();
-        if (!InfoMgr.INST.exist(info)) {
+        ServerInfo serverInfo = server.getInfo();
+        if (!InfoMgr.INST.check(serverInfo)) {
             return;
         }
 
-        val i = InfoMgr.INST.get(info);
-        if (i.incValue() >= -1) {
-            i.update(() -> ZoneMgr.INST.select(info).queue(i));
+        Zone zone = ZoneMgr.INST.select(serverInfo);
+        Info i = InfoMgr.INST.mapping(serverInfo);
+
+        if (i.incValue() < -1) {
+            zone.queue(i);
+        } else {
+            i.update(() -> zone.queue(i));
         }
     }
 

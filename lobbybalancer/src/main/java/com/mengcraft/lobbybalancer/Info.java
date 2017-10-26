@@ -41,7 +41,7 @@ public class Info implements Comparable<Info> {
         ref++;
     }
 
-    static Info of(ServerInfo info) {
+    static Info build(ServerInfo info) {
         return new Info(info);
     }
 }
