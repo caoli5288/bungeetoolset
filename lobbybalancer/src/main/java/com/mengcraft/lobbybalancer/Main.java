@@ -38,8 +38,14 @@ public class Main extends Plugin {
             ZoneMgr.INST.add(Pattern.compile(l.getAsString()));
         }
 
-        getProxy().getPluginManager().registerCommand(this, new MainCommand());
+        Plugin depend = getProxy().getPluginManager().getPlugin("bungeelistd");
+        if (!$.nil(depend)) {
+            getProxy().getPluginManager().registerListener(this, new DynListListener());
+        }
         getProxy().getPluginManager().registerListener(this, new MainListener());
+
+        getProxy().getPluginManager().registerCommand(this, new MainCommand());
+        getProxy().getPluginManager().registerCommand(this, new BalanceCommand());
     }
 
     public static void log(Object message) {

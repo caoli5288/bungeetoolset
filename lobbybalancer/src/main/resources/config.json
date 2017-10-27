@@ -1,6 +1,5 @@
 {
   "pattern": [
-    "lobby-\\w+",
-    "hub-\\w+"
+    "lobby-\\w+"
   ]
 }

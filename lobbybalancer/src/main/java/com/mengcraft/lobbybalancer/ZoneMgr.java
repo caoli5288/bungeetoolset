@@ -30,14 +30,15 @@ public enum ZoneMgr {
 
     @SneakyThrows
     public static Zone select(ServerInfo info) {
-        return INST.query.get(info.getName(), () -> {
+        return select(info.getName());
+    }
+
+    @SneakyThrows
+    public static Zone select(String name) {
+        return INST.query.get(name, () -> {
             for (Pattern p : INST.all) {
-                if (p.matcher(info.getName()).matches()) {
-                    Zone zone = INST.mapping.computeIfAbsent(p.pattern(), pt -> Zone.build(p));
-                    if (zone.outdated()) {
-                        zone.update();
-                    }
-                    return zone;
+                if (p.matcher(name).matches()) {
+                    return INST.mapping.computeIfAbsent(p.pattern(), pt -> Zone.build(p));
                 }
             }
             return Zone.NIL;
@@ -47,12 +48,12 @@ public enum ZoneMgr {
     @SneakyThrows
     public void updateAll(CommandSender who) {
         for (Pattern p : all) {
-            Zone zone = mapping.get(p.pattern());
-            if ($.nil(zone)) {
-                mapping.put(p.pattern(), Zone.build(p));
-            } else {
-                zone.update();
-            }
+            mapping.compute(p.pattern(), (key, value) -> {
+                if ($.nil(value)) {
+                    return Zone.build(p);
+                }
+                return value.update();
+            });
         }
         if (!(who == null)) who.sendMessage("Okay");
     }
@@ -67,7 +68,7 @@ public enum ZoneMgr {
 
     public void sendHead(CommandSender who) {
         for (Zone zone : mapping.values()) {
-            who.sendMessage("Zone(pattern=\"" + zone.getPattern() + "\", head=\"" + zone.alive().poll() + "\")");
+            who.sendMessage("Zone(pattern=\"" + zone.getPattern() + "\", head=\"" + zone.alive().peek() + "\")");
         }
     }
 

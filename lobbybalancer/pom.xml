@@ -12,5 +12,14 @@
     <artifactId>lobbybalancer</artifactId>
     <version>17.10-SNAPSHOT</version>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.mengcraft</groupId>
+            <artifactId>bungeelistd</artifactId>
+            <version>17.10-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
 
 </project>

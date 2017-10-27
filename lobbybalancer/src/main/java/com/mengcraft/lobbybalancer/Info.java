@@ -36,15 +36,15 @@ public class Info implements Comparable<Info> {
         return $.now() - updateTime > 60000;
     }
 
-    public void update(Runnable callback) {
+    public void update(Zone zone) {
         value = Integer.MAX_VALUE;
         updateTime = $.now();
         serverInfo.ping((result, err) -> {
             if (err == null) {
-                val cnt = result.getPlayers();
-                value = cnt.getOnline() - cnt.getMax();
+                val i = result.getPlayers();
+                value = i.getOnline() - i.getMax();
             }
-            if (!(callback == null)) callback.run();
+            if (!$.nil(zone)) zone.queue(this);
         });
     }
 

@@ -73,14 +73,14 @@ public class MainListener implements Listener {
         Info i = InfoMgr.mapping(serverInfo);
 
         if (i.outdated() || i.incValue() > -1) {
-            i.update(() -> zone.queue(i));
+            i.update(zone);
         } else {
             zone.queue(i);
         }
 
         if (!serverInfo.getName().equals(target)) {
             val info = InfoMgr.getByName(target);
-            info.update(() -> zone.queue(info));
+            info.update(zone);
         }
     }
 
