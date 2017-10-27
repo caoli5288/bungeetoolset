@@ -11,7 +11,6 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
 import java.util.Map;
-import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,49 +36,51 @@ public class MainListener implements Listener {
         }
 
         locking.put(id, "");
+
         val player = ((UserConnection) event.getPlayer());
-        if (player.getServer() == null) {
-            Queue<String> alive = zone.alive();
+        val alive = zone.alive();
+        String target = alive.peek();
+
+        if (!(target == null)) {
             player.setServerJoinQueue(alive);
-            val head = alive.peek();
-            if (!(head == null)) {
-                event.setTarget(InfoMgr.INST.getByName(head).getServerInfo());
+            join.put(id, target);
+            val targetInfo = InfoMgr.getByName(target).getServerInfo();
+            if (player.getServer() == null) {
+                event.setTarget(targetInfo);
+            } else {
+                event.setCancelled(true);
+                player.connect(targetInfo, null, true);
             }
-            join.put(id, "");
-        } else {
-            zone.connect(player, result -> {
-                if (result) {
-                    locking.remove(id);
-                } else {
-                    player.connect(old, (i, err) -> locking.remove(id));
-                }
-            });
-            event.setCancelled(true);
         }
 
-        Main.log("Redirect player " + zone.getPattern().pattern());
+        Main.log("Redirect " + player.getName() + " by " + zone.getPattern().pattern());
     }
 
     public void unlock(UUID id, Server server) {
-        String removal = join.remove(id);
+        String target = join.remove(id);
         locking.remove(id);
 
-        if (removal == null || server == null) {
+        if (target == null || server == null) {
             return;
         }
 
         ServerInfo serverInfo = server.getInfo();
-        if (!InfoMgr.INST.check(serverInfo)) {
+        if (!InfoMgr.check(serverInfo)) {
             return;
         }
 
         Zone zone = ZoneMgr.INST.select(serverInfo);
-        Info i = InfoMgr.INST.mapping(serverInfo);
+        Info i = InfoMgr.mapping(serverInfo);
 
         if (i.incValue() < -1) {
             zone.queue(i);
         } else {
             i.update(() -> zone.queue(i));
+        }
+
+        if (!serverInfo.getName().equals(target)) {
+            val info = InfoMgr.getByName(target);
+            info.update(() -> zone.queue(info));
         }
     }
 
