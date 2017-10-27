@@ -97,6 +97,7 @@ public class Main extends Plugin implements Listener {
                 input.put(i.getName(), i);
             }
         }
+        getProxy().getPluginManager().callEvent(new DynamicListEvent());
         getLogger().info("Invoke dynamic server list done!");
     }
 

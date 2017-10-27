@@ -32,6 +32,7 @@ public class InfoGroup {
             synchronized (all) {
                 all.put(info.getHandle().getName(), info.getHandle());
             }
+            BungeeCord.getInstance().getPluginManager().callEvent(new RuntimeServerEvent(info.getHandle(), RuntimeServerEvent.Action.UP));
             RTServer.log(info.getHandle().getName() + info.getHandle().getAddress() + " online", true);
         }
         info.setAlive(1);
@@ -44,6 +45,7 @@ public class InfoGroup {
                 synchronized (all) {
                     all.remove(info.getHandle().getName());
                 }
+                BungeeCord.getInstance().getPluginManager().callEvent(new RuntimeServerEvent(info.getHandle(), RuntimeServerEvent.Action.DOWN));
                 RTServer.log(info.getHandle().getName() + info.getHandle().getAddress() + " offline", true);
             }
         });
