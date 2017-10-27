@@ -72,10 +72,10 @@ public class MainListener implements Listener {
         Zone zone = ZoneMgr.INST.select(serverInfo);
         Info i = InfoMgr.mapping(serverInfo);
 
-        if (i.incValue() < -1) {
-            zone.queue(i);
-        } else {
+        if (i.outdated() || i.incValue() > -1) {
             i.update(() -> zone.queue(i));
+        } else {
+            zone.queue(i);
         }
 
         if (!serverInfo.getName().equals(target)) {

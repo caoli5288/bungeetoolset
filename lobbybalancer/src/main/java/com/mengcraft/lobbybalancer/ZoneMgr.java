@@ -3,7 +3,6 @@ package com.mengcraft.lobbybalancer;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.SneakyThrows;
-import lombok.val;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.config.ServerInfo;
 
@@ -21,24 +20,24 @@ public enum ZoneMgr {
 
     INST;
 
-    private final Map<String, Pair<Zone, Long>> mapping = new ConcurrentHashMap<>();
+    private final Map<String, Zone> mapping = new ConcurrentHashMap<>();
 
     private final Cache<String, Zone> query = CacheBuilder.newBuilder()
-            .expireAfterWrite(1, TimeUnit.MINUTES)
+            .expireAfterAccess(1, TimeUnit.HOURS)
             .build();
 
     private final List<Pattern> all = new ArrayList<>();
 
     @SneakyThrows
-    public Zone select(ServerInfo info) {
-        return query.get(info.getName(), () -> {
-            for (Pattern p : all) {
+    public static Zone select(ServerInfo info) {
+        return INST.query.get(info.getName(), () -> {
+            for (Pattern p : INST.all) {
                 if (p.matcher(info.getName()).matches()) {
-                    Pair<Zone, Long> pair = mapping.computeIfAbsent(p.pattern(), pt -> new Pair<>(Zone.build(p), System.currentTimeMillis()));
-                    if (pair.getValue() > System.currentTimeMillis() - 60000) {
-                        return mapping.compute(p.pattern(), (pt, i) -> new Pair<>(Zone.build(p), System.currentTimeMillis())).getKey();
+                    Zone zone = INST.mapping.computeIfAbsent(p.pattern(), pt -> Zone.build(p));
+                    if (zone.outdated()) {
+                        zone.update();
                     }
-                    return pair.getKey();
+                    return zone;
                 }
             }
             return Zone.NIL;
@@ -47,9 +46,13 @@ public enum ZoneMgr {
 
     @SneakyThrows
     public void updateAll(CommandSender who) {
-        mapping.clear();
         for (Pattern p : all) {
-            mapping.put(p.pattern(), new Pair<>(Zone.build(p), System.currentTimeMillis()));
+            Zone zone = mapping.get(p.pattern());
+            if ($.nil(zone)) {
+                mapping.put(p.pattern(), Zone.build(p));
+            } else {
+                zone.update();
+            }
         }
         if (!(who == null)) who.sendMessage("Okay");
     }
@@ -63,8 +66,7 @@ public enum ZoneMgr {
     }
 
     public void sendHead(CommandSender who) {
-        for (Pair<Zone, Long> p : mapping.values()) {
-            val zone = p.getKey();
+        for (Zone zone : mapping.values()) {
             who.sendMessage("Zone(pattern=\"" + zone.getPattern() + "\", head=\"" + zone.alive().poll() + "\")");
         }
     }

@@ -1,6 +1,12 @@
 package com.mengcraft.lobbybalancer;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.val;
 import net.md_5.bungee.BungeeCord;
 
 import java.util.LinkedList;
@@ -21,6 +27,9 @@ public class Zone {
     private final Pattern pattern;
     private final BlockingQueue<Info> queue = new PriorityBlockingQueue<>();
 
+    @Setter(value = AccessLevel.NONE)
+    private long updateTime;
+
     public void queue(Info add) {
         while (queue.remove(add)) {
             ;
@@ -40,18 +49,27 @@ public class Zone {
         return out;
     }
 
-    static Zone build(@NonNull Pattern pattern) {
-        Zone zone = new Zone(pattern);
+    public boolean outdated() {
+        return $.now() - updateTime > 180000;
+    }
+
+    public void update() {
+        updateTime = $.now();
         BungeeCord.getInstance().getServers().forEach((name, serverInfo) -> {
             if (pattern.matcher(name).matches()) {
-                Info info = InfoMgr.INST.mapping(serverInfo);
-                if (info.getRef() == 0 || info.getValue() == Integer.MAX_VALUE) {
-                    info.update(() -> zone.queue(info));
+                Info info = InfoMgr.mapping(serverInfo);
+                if (info.outdated() || info.getValue() == Integer.MAX_VALUE) {
+                    info.update(() -> queue(info));
                 } else {
-                    zone.queue(info);
+                    queue(info);
                 }
             }
         });
+    }
+
+    static Zone build(@NonNull Pattern pattern) {
+        Zone zone = new Zone(pattern);
+        zone.update();
         return zone;
     }
 

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.val;
 import net.md_5.bungee.api.config.ServerInfo;
 
@@ -17,8 +18,10 @@ import net.md_5.bungee.api.config.ServerInfo;
 public class Info implements Comparable<Info> {
 
     private final ServerInfo serverInfo;
-    private int ref;
     private int value;
+
+    @Setter(value = AccessLevel.NONE)
+    private long updateTime;
 
     @Override
     public int compareTo(@NonNull Info other) {
@@ -29,8 +32,13 @@ public class Info implements Comparable<Info> {
         return ++value;
     }
 
+    public boolean outdated() {
+        return $.now() - updateTime > 60000;
+    }
+
     public void update(Runnable callback) {
         value = Integer.MAX_VALUE;
+        updateTime = $.now();
         serverInfo.ping((result, err) -> {
             if (err == null) {
                 val cnt = result.getPlayers();
@@ -38,7 +46,6 @@ public class Info implements Comparable<Info> {
             }
             if (!(callback == null)) callback.run();
         });
-        ref++;
     }
 
     static Info bind(ServerInfo info) {
