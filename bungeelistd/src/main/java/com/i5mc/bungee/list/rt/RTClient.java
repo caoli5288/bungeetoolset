@@ -116,6 +116,7 @@ public class RTClient extends JavaPlugin {
                         getLogger().log(Level.INFO, "Discover service okay");
                     }
                 } catch (IOException e) {
+                    getLogger().log(Level.INFO, "Discover service failed. " + e.getMessage());
                 }
             }
             Bukkit.getScheduler().runTaskTimer(this, this::keepAlive, 50, 200);

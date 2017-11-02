@@ -42,7 +42,7 @@ public enum RTServer implements Runnable {
                     log("Discover service okay");
                 }
             } catch (IOException e) {
-                log(e);
+                log("Discover service shutdown. " + e.getMessage());
             }
         }
     }
