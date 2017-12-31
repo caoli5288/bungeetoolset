@@ -1,5 +1,6 @@
 package com.mengcraft.bunllect;
 
+import com.mengcraft.bunllect.entity.EntityTotal;
 import lombok.SneakyThrows;
 import lombok.val;
 import org.bukkit.entity.Player;
@@ -18,22 +19,22 @@ public enum TimePool {
 
     INSTANCE;
 
-    private final Map<UUID, Future<Pair<Integer, Integer>>> pool = new HashMap<>();
+    private final Map<UUID, Future<Pair<EntityTotal, Integer>>> pool = new HashMap<>();
 
     @SneakyThrows
-    public Pair<Integer, Integer> get(Player p) {
+    public Pair<EntityTotal, Integer> get(Player p) {
         return look(p).get();
     }
 
-    static final String TOTAL = "SELECT" +
-            " `life` " +
+    private final String total = "SELECT" +
+            " `life`,`latest_join` " +
             "FROM" +
             " `bunllect_total` " +
             "WHERE" +
             " `name` = ?" +
             ";";
 
-    static final String TODAY = "SELECT" +
+    private final String today = "SELECT" +
             " SUM(`life`) AS `i2` " +
             "FROM" +
             " `bunllect` " +
@@ -45,19 +46,22 @@ public enum TimePool {
             " `name` = ?" +
             ";";
 
-    public Future<Pair<Integer, Integer>> look(Player p) {
+    public Future<Pair<EntityTotal, Integer>> look(Player p) {
         return pool.computeIfAbsent(p.getUniqueId(), id -> CompletableFuture.supplyAsync(() -> {
+            EntityTotal t = new EntityTotal();
             try {
-                int i1 = -1;
                 val conn = MyPlugin.conn.getConnection();
-                try (val st = conn.prepareStatement(TOTAL)) {
+                try (val st = conn.prepareStatement(this.total)) {
                     st.setString(1, p.getName());
                     try (val result = st.executeQuery()) {
-                        if (result.next()) i1 = result.getInt("life");
+                        if (result.next()) {
+                            t.setLife(result.getInt("life"));
+                            t.setLatestJoin(result.getTimestamp("latest_join"));
+                        }
                     }
                 }
                 int i2 = -1;
-                try (val st = conn.prepareStatement(TODAY)) {
+                try (val st = conn.prepareStatement(today)) {
                     st.setString(1, $.now().toString().substring(0, 10));
                     st.setString(2, p.getName());
                     try (val result = st.executeQuery()) {
@@ -65,11 +69,11 @@ public enum TimePool {
                     }
 
                 }
-                return new Pair<>(i1, i2);
+                return new Pair<>(t, i2);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            return new Pair<>(-1, -1);
+            return new Pair<>(t, -1);
         }));
     }
 
