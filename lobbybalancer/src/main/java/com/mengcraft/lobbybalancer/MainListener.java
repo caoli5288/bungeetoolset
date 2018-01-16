@@ -19,23 +19,19 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MainListener implements Listener {
 
-    private final Map<UUID, String> locking = new ConcurrentHashMap<>();
     private final Map<UUID, String> join = new ConcurrentHashMap<>();
 
     @EventHandler
     public void handle(ServerConnectEvent event) {
         val id = event.getPlayer().getUniqueId();
-        if (locking.containsKey(id)) {
+        if (join.containsKey(id)) {
             return;
         }
 
-        val old = event.getTarget();
-        val zone = ZoneMgr.INST.select(old);
+        val zone = ZoneMgr.select(event.getTarget());
         if (zone == Zone.NIL) {
             return;
         }
-
-        locking.put(id, "");
 
         val player = ((UserConnection) event.getPlayer());
         val alive = zone.alive();
@@ -58,7 +54,6 @@ public class MainListener implements Listener {
 
     public void unlock(UUID id, Server server) {
         String target = join.remove(id);
-        locking.remove(id);
 
         if (target == null || server == null) {
             return;
@@ -69,7 +64,7 @@ public class MainListener implements Listener {
             return;
         }
 
-        Zone zone = ZoneMgr.INST.select(serverInfo);
+        Zone zone = ZoneMgr.select(serverInfo);
         Info i = InfoMgr.mapping(serverInfo);
 
         if (i.outdated() || i.incValue() > -1) {
