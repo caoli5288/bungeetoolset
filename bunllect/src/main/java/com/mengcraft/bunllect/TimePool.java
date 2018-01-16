@@ -1,15 +1,23 @@
 package com.mengcraft.bunllect;
 
+import com.mengcraft.bunllect.entity.EntityTotal;
 import lombok.SneakyThrows;
 import lombok.val;
 import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by on 2017/6/11.
@@ -18,59 +26,95 @@ public enum TimePool {
 
     INSTANCE;
 
-    private final Map<UUID, Future<Pair<Integer, Integer>>> pool = new HashMap<>();
+    private final Map<UUID, Future<Pair<EntityTotal, DateValidObject<Integer>>>> pool = new HashMap<>();
 
     @SneakyThrows
-    public Pair<Integer, Integer> get(Player p) {
+    public Pair<EntityTotal, DateValidObject<Integer>> get(Player p) {
         return look(p).get();
     }
 
-    static final String TOTAL = "SELECT" +
-            " `life` " +
+    private final String total = "SELECT" +
+            " `life`,`latest_join` " +
             "FROM" +
             " `bunllect_total` " +
             "WHERE" +
             " `name` = ?" +
             ";";
 
-    static final String TODAY = "SELECT" +
-            " SUM(`life`) AS `i2` " +
+    private final String between = "SELECT" +
+            " `life`,`time` " +
             "FROM" +
             " `bunllect` " +
             "WHERE" +
             " `time` > ? " +
             "AND" +
-            " `time` < NOW() " +
+            " `time` < ? " +
             "AND" +
             " `name` = ?" +
             ";";
 
-    public Future<Pair<Integer, Integer>> look(Player p) {
+    public Future<Pair<EntityTotal, DateValidObject<Integer>>> look(Player p) {
         return pool.computeIfAbsent(p.getUniqueId(), id -> CompletableFuture.supplyAsync(() -> {
+            EntityTotal t = new EntityTotal();
             try {
-                int i1 = -1;
                 val conn = MyPlugin.conn.getConnection();
-                try (val st = conn.prepareStatement(TOTAL)) {
+                try (val st = conn.prepareStatement(this.total)) {
                     st.setString(1, p.getName());
                     try (val result = st.executeQuery()) {
-                        if (result.next()) i1 = result.getInt("life");
+                        if (result.next()) {
+                            t.setLife(result.getInt("life"));
+                            t.setLatestJoin(result.getTimestamp("latest_join"));
+                        }
                     }
                 }
-                int i2 = -1;
-                try (val st = conn.prepareStatement(TODAY)) {
-                    st.setString(1, $.now().toString().substring(0, 10));
-                    st.setString(2, p.getName());
+                AtomicInteger letch = new AtomicInteger();
+                try (val st = conn.prepareStatement(between)) {
+                    st.setString(1, LocalDate.now().toString());
+                    st.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+                    st.setString(3, p.getName());
                     try (val result = st.executeQuery()) {
-                        if (result.next()) i2 = result.getInt("i2");
+                        while (result.next()) {
+                            int life = result.getInt("life");
+                            Instant quit = result.getTimestamp("time").toInstant();
+                            Instant join = quit.minusSeconds(life);
+                            if (quit.atZone(ZoneId.systemDefault()).toLocalDate().isEqual(join.atZone(ZoneId.systemDefault()).toLocalDate())) {
+                                letch.addAndGet(life);
+                            } else {
+                                letch.addAndGet((int) ChronoUnit.SECONDS.between(LocalDate.now().atStartOfDay(), LocalDateTime.now()));
+                            }
+                        }
                     }
 
                 }
-                return new Pair<>(i1, i2);
+                return new Pair<>(t, new DateValidObject<>(letch.intValue()));
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            return new Pair<>(-1, -1);
+            return new Pair<>(t, new DateValidObject<>(-1));
         }));
+    }
+
+    @SneakyThrows
+    public static int between(Player p, Timestamp left, Timestamp right) {
+        AtomicInteger letch = new AtomicInteger();
+        try (val statement = MyPlugin.conn.getConnection().prepareStatement(INSTANCE.between)) {
+            statement.setTimestamp(1, (left));
+            statement.setTimestamp(2, (right));
+            statement.setString(3, p.getName());
+            try (val result = statement.executeQuery()) {
+                while (result.next()) {
+                    int life = result.getInt("life");
+                    Instant quit = result.getTimestamp("time").toInstant();
+                    Instant join = quit.minusSeconds(life);
+                    if (quit.atZone(ZoneId.systemDefault()).toLocalDate().isEqual(join.atZone(ZoneId.systemDefault()).toLocalDate())) {
+                        letch.addAndGet(life);
+                    } else {
+                        letch.addAndGet((int) ChronoUnit.SECONDS.between(quit.atZone(ZoneId.systemDefault()).toLocalDate().atStartOfDay(), quit.atZone(ZoneId.systemDefault()).toLocalDateTime()));
+                    }
+                }
+            }
+        }
+        return letch.get();
     }
 
     public static void quit(Player p) {

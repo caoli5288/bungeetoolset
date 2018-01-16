@@ -42,7 +42,7 @@ public class MyPlugin extends JavaPlugin implements Listener, EventExecutor {
         conn.setUser(p.getProperty("bunllect.jdbc.user"));
         conn.setPassword(p.getProperty("bunllect.jdbc.password"));
 
-        val query = new Var(this);
+        val query = new PAPIHook(this);
         query.hook();
 
         PlayerQuitEvent.getHandlerList().register(new RegisteredListener(this, this, EventPriority.NORMAL, this, false));

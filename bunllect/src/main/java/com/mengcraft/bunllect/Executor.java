@@ -29,7 +29,15 @@ public class Executor implements Listener {
 
     @EventHandler
     public void handle(PostLoginEvent event) {
-        time.put(event.getPlayer().getName(), $.now());
+        ProxiedPlayer who = event.getPlayer();
+        EntityQueue.QUEUE.offer(new EntityTotal(who.getName(),
+                who.getUniqueId(),
+                null,
+                -1,
+                null,
+                true
+        ));
+        time.put(who.getName(), $.now());
     }
 
     @EventHandler
@@ -54,7 +62,9 @@ public class Executor implements Listener {
                     who,
                     p.getUniqueId(),
                     ip,
-                    life
+                    life,
+                    null,
+                    false
             ));
         }
     }
