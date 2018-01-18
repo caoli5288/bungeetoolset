@@ -26,7 +26,7 @@ public class InfoGroup {
     }
 
     public void alive(String host, int port) {
-        val info = handle.computeIfAbsent(host + ":" + port, key -> b(key, new InetSocketAddress(host, port)));
+        val info = handle.computeIfAbsent(host.replace('.', '_') + "_" + port, key -> b(key, new InetSocketAddress(host, port)));
         if (info.getAlive() == -1) {
             val all = BungeeCord.getInstance().getServers();
             synchronized (all) {
@@ -52,7 +52,7 @@ public class InfoGroup {
     }
 
     private Info b(String key, InetSocketAddress remote) {
-        val i = new BungeeServerInfo(name + "-" + Integer.toHexString(key.hashCode()), remote, "", false);
+        val i = new BungeeServerInfo(name + "-" + (RT.INSTANCE.isFixedId() ? key : (handle.size() + 1)), remote, "", false);
         BungeeCord.getInstance().getServers().put(i.getName(), i);
         return new Info(i, -1);
     }

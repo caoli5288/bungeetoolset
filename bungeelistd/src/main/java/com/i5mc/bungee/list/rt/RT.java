@@ -25,6 +25,7 @@ public class RT {
 
     private boolean listen;
     private boolean log;
+    private boolean fixedId;
 
     private Discover discover;
 
@@ -33,7 +34,7 @@ public class RT {
 
     @SneakyThrows
     public static void load(File l) {
-        INSTANCE.load(JSONLocal.parse(new FileReader(l), RT.class));
+        INSTANCE.load(JSONLocal.load(new FileReader(l), RT.class));
     }
 
     void load(RT l) {
@@ -42,6 +43,7 @@ public class RT {
         log = l.log;
         group = l.group;
         discover = l.discover;
+        fixedId = l.fixedId;
     }
 
     public static final RT INSTANCE = new RT();

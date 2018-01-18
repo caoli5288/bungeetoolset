@@ -8,5 +8,6 @@
     "host": "",
     "port": 6379
   },
-  "group": ""
+  "group": "",
+  "fixed_id": false
 }
