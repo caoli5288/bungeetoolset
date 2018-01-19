@@ -20,26 +20,26 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 @NoArgsConstructor
-public class PullReq implements IDataPacket {
+public class PullRes implements IDataPacket {
 
     @AllArgsConstructor
     @Data
-    public static class Req {
+    public static class Res {
 
         private String name;
         private String host;
         private int port;
 
-        public Req(String name, InetSocketAddress add) {
+        public Res(String name, InetSocketAddress add) {
             this(name, add.getAddress().getHostAddress(), add.getPort());
         }
     }
 
-    private List<Req> alive;
+    private List<Res> alive;
 
     @Override
     public String protocol() {
-        return Protocol.PULL_REQ.name();
+        return Protocol.PULL_RES.name();
     }
 
     @Override
@@ -48,10 +48,10 @@ public class PullReq implements IDataPacket {
 
     @SneakyThrows
     public void input(DataInput input) {
-        ImmutableList.Builder<Req> b = ImmutableList.builder();
+        ImmutableList.Builder<Res> b = ImmutableList.builder();
         int len = input.readInt();
         for (int i = 0; i < len; i++) {
-            b.add(new Req(input.readUTF(), input.readUTF(), input.readInt()));
+            b.add(new Res(input.readUTF(), input.readUTF(), input.readInt()));
         }
         alive = b.build();
     }
@@ -59,7 +59,7 @@ public class PullReq implements IDataPacket {
     @SneakyThrows
     public void output(DataOutput output) {
         output.writeInt(alive.size());
-        for (Req req : alive) {
+        for (Res req : alive) {
             output.writeUTF(req.name);
             output.writeUTF(req.host);
             output.writeInt(req.port);

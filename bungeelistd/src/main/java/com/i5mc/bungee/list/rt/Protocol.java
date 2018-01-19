@@ -3,7 +3,7 @@ package com.i5mc.bungee.list.rt;
 import com.i5mc.bungee.list.rt.protocol.Dist;
 import com.i5mc.bungee.list.rt.protocol.Heartbeat;
 import com.i5mc.bungee.list.rt.protocol.Pull;
-import com.i5mc.bungee.list.rt.protocol.PullReq;
+import com.i5mc.bungee.list.rt.protocol.PullRes;
 import lombok.SneakyThrows;
 import lombok.val;
 
@@ -21,7 +21,7 @@ public enum Protocol {
     HEARTBEAT(() -> new Heartbeat()),
     DIST(() -> new Dist()),
     PULL(() -> new Pull()),
-    PULL_REQ(() -> new PullReq());
+    PULL_RES(() -> new PullRes());
 
     private final Supplier<IDataPacket> fct;
 

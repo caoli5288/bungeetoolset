@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.i5mc.bungee.list.rt.protocol.Dist;
 import com.i5mc.bungee.list.rt.protocol.Heartbeat;
 import com.i5mc.bungee.list.rt.protocol.Pull;
-import com.i5mc.bungee.list.rt.protocol.PullReq;
+import com.i5mc.bungee.list.rt.protocol.PullRes;
 import lombok.SneakyThrows;
 import lombok.val;
 import org.bukkit.Bukkit;
@@ -35,13 +35,13 @@ public class RTClient extends JavaPlugin {
         l = new LinkedList<>(RT.INSTANCE.getDist());
     }
 
-    public List<PullReq.Req> pull(String group) {
+    public List<PullRes.Res> pull(String group) {
         val endpoint = l.element();
         try (val cli = conn(endpoint)) {
             val p = new Pull(group);
             Protocol.output(cli.getOutputStream(), p);
             val receive = Protocol.input(cli.getInputStream());
-            return ((PullReq) receive).getAlive();
+            return ((PullRes) receive).getAlive();
         } catch (Exception ign) {
             l.poll();
             if (!l.isEmpty()) return pull(group);
