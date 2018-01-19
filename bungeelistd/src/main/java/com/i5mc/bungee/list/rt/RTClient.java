@@ -29,22 +29,20 @@ public class RTClient extends JavaPlugin {
     private LinkedList<String> l;
     private RTDiscover discover;
 
-    @SneakyThrows
-    void reload() {
-        RT.load(new File(getDataFolder(), "config.yml"));
-        l = new LinkedList<>(RT.INSTANCE.getDist());
+    public List<PullRes.Res> pull(String group) {
+        return pull(group, false);
     }
 
-    public List<PullRes.Res> pull(String group) {
+    public List<PullRes.Res> pull(String group, boolean full) {
         val endpoint = l.element();
         try (val cli = conn(endpoint)) {
-            val p = new Pull(group);
+            val p = new Pull(group, full);
             Protocol.output(cli.getOutputStream(), p);
             val receive = Protocol.input(cli.getInputStream());
             return ((PullRes) receive).getAlive();
         } catch (Exception ign) {
             l.poll();
-            if (!l.isEmpty()) return pull(group);
+            if (!l.isEmpty()) return pull(group, full);
         }
         return ImmutableList.of();
     }
@@ -121,6 +119,12 @@ public class RTClient extends JavaPlugin {
             }
             Bukkit.getScheduler().runTaskTimer(this, this::keepAlive, 50, 200);
         }
+    }
+
+    @SneakyThrows
+    void reload() {
+        RT.load(new File(getDataFolder(), "config.yml"));
+        l = new LinkedList<>(RT.INSTANCE.getDist());
     }
 
 }

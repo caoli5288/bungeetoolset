@@ -6,6 +6,7 @@ import com.i5mc.bungee.list.rt.IDataPacket;
 import com.i5mc.bungee.list.rt.Protocol;
 import com.i5mc.bungee.list.rt.RTInfoMgr;
 import com.i5mc.bungee.list.rt.RTServer;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
@@ -22,21 +23,13 @@ import java.util.regex.Pattern;
 /**
  * Created on 17-7-19.
  */
+@AllArgsConstructor
 @Data
 @NoArgsConstructor
 public class Pull implements IDataPacket {
 
     private String group;
     private boolean full;
-
-    public Pull(String group) {
-        this.group = group;
-    }
-
-    public Pull(String group, boolean full) {
-        this.group = group;
-        this.full = full;
-    }
 
     @Override
     public String protocol() {
@@ -55,11 +48,14 @@ public class Pull implements IDataPacket {
 
     public static List<ServerInfo> find(Pattern pattern) {
         val b = ImmutableList.<ServerInfo>builder();
-        BungeeCord.getInstance().getServers().forEach((name, info) -> {
-            if (pattern.matcher(name).matches()) {
-                b.add(info);
-            }
-        });
+        val all = BungeeCord.getInstance().getServers();
+        synchronized (all) {
+            all.forEach((name, info) -> {
+                if (pattern.matcher(name).matches()) {
+                    b.add(info);
+                }
+            });
+        }
         return b.build();
     }
 
