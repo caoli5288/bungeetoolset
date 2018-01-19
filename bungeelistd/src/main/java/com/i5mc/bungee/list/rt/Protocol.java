@@ -33,7 +33,11 @@ public enum Protocol {
     public static IDataPacket input(InputStream st) {
         val input = new DataInputStream(st);
         val p = valueOf(input.readUTF()).fct.get();
-        p.input(input);
+        try {
+            p.input(input);
+        } catch (Exception ign) {
+            // 就当无事发生吧
+        }
         return p;
     }
 

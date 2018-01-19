@@ -24,6 +24,7 @@ public class Dist implements IDataPacket {
     private String group;
     private String host;
     private int port;
+    private boolean fixedId;
 
     @Override
     public String protocol() {
@@ -32,7 +33,7 @@ public class Dist implements IDataPacket {
 
     @Override
     public void exec(Socket so) {
-        RTInfoMgr.alive(group, host, port);
+        RTInfoMgr.alive(group, host, port, fixedId);
         RTServer.log(this);
     }
 
@@ -41,6 +42,7 @@ public class Dist implements IDataPacket {
         group = input.readUTF();
         host = input.readUTF();
         port = input.readInt();
+        fixedId = input.readBoolean();
     }
 
     @SneakyThrows
@@ -48,5 +50,6 @@ public class Dist implements IDataPacket {
         output.writeUTF(group);
         output.writeUTF(host);
         output.writeInt(port);
+        output.writeBoolean(fixedId);
     }
 }

@@ -23,6 +23,7 @@ public class Heartbeat implements IDataPacket {
     private String group;
     private String host;
     private int port;
+    private boolean fixedId;
 
     @Override
     public String protocol() {
@@ -31,7 +32,7 @@ public class Heartbeat implements IDataPacket {
 
     @SneakyThrows
     public void exec(Socket so) {
-        RTServer.distribute(new Dist(group, host, port));
+        RTServer.distribute(new Dist(group, host, port, fixedId));
     }
 
     @SneakyThrows
@@ -39,6 +40,7 @@ public class Heartbeat implements IDataPacket {
         group = input.readUTF();
         host = input.readUTF();
         port = input.readInt();
+        fixedId = input.readBoolean();
     }
 
     @SneakyThrows
@@ -46,6 +48,7 @@ public class Heartbeat implements IDataPacket {
         output.writeUTF(group);
         output.writeUTF(host);
         output.writeInt(port);
+        output.writeBoolean(fixedId);
     }
 
 }

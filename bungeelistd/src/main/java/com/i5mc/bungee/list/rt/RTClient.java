@@ -62,7 +62,7 @@ public class RTClient extends JavaPlugin {
             val endpoint = l.element();
             runAsync(() -> {
                 try (val cli = conn(endpoint)) {
-                    val p = new Heartbeat(RT.INSTANCE.getGroup(), cli.getLocalAddress().getHostAddress(), Bukkit.getPort());
+                    val p = new Heartbeat(RT.INSTANCE.getGroup(), cli.getLocalAddress().getHostAddress(), Bukkit.getPort(), RT.INSTANCE.isFixedId());
                     Protocol.output(cli.getOutputStream(), p);
                     log(p);
                 } catch (Exception ign) {
@@ -77,7 +77,7 @@ public class RTClient extends JavaPlugin {
             byte[] ch = RTDiscover.PUB.getBytes("utf-8");
             runAsync(() -> {
                 try (val cli = discover.getPool().getResource()) {
-                    val p = new Dist(RT.INSTANCE.getGroup(), discover.getLocalhost(), Bukkit.getPort());
+                    val p = new Dist(RT.INSTANCE.getGroup(), discover.getLocalhost(), Bukkit.getPort(), RT.INSTANCE.isFixedId());
                     val buf = new ByteArrayOutputStream();
                     Protocol.output(buf, p);
                     cli.publish(ch, buf.toByteArray());

@@ -17,9 +17,9 @@ public enum RTInfoMgr {
 
     private final Map<String, InfoGroup> map = new HashMap<>();
 
-    public static void alive(String group, String host, int port) {
+    public static void alive(String group, String host, int port, boolean fixedId) {
         val i = INSTANCE.map.computeIfAbsent(group, key -> new InfoGroup(key));
-        i.alive(host, port);
+        i.alive(host, port, fixedId);
     }
 
     public static void valid() {

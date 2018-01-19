@@ -29,13 +29,18 @@ password=wowsuchpassword
 特别的，请在你所定义的数据库里面手动创建你所定义的数据表，参考语句如下。栏位的意义应该不用多解释。
 ```SQL
 CREATE TABLE `bungeelistd` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` char(32) NOT NULL,
-  `host` char(15) NOT NULL,
-  `port` smallint(5) unsigned NOT NULL,
-  `restricted` tinyint(3) unsigned NOT NULL,
-  PRIMARY KEY (`id`)
+`id`  int(11) UNSIGNED NOT NULL AUTO_INCREMENT ,
+`name`  char(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ,
+`host`  char(15) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ,
+`port`  smallint(5) UNSIGNED NOT NULL ,
+`restricted`  tinyint(10) UNSIGNED ZEROFILL NOT NULL ,
+PRIMARY KEY (`id`)
 )
+ENGINE=InnoDB
+DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci
+;
+
+
 ```
 
 你可以根据你的数据库实际情况调整数据类型，以上栏位是必须的。
