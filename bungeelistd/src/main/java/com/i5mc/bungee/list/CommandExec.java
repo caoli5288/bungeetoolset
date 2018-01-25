@@ -3,6 +3,7 @@ package com.i5mc.bungee.list;
 import com.i5mc.bungee.list.rt.RT;
 import com.i5mc.bungee.list.rt.RTServer;
 import lombok.val;
+import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
@@ -11,6 +12,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
+import java.util.regex.Pattern;
 
 /**
  * Created on 17-7-20.
@@ -22,6 +24,18 @@ public class CommandExec extends Command {
     }
 
     private enum Exec {
+
+        FILTER((p, itr) -> {
+            Pattern pattern = Pattern.compile(itr.next() + "-(.)+");
+            BungeeCord.getInstance().getServers().forEach((id, info) -> {
+                if (!pattern.matcher(id).matches()) {
+                    return;
+                }
+                p.sendMessage("- id: " + id);
+                p.sendMessage("  value: " + $.join(info.getPlayers(), i -> i.getName(), ", "));
+                p.sendMessage("  ip: " + info.getAddress());
+            });
+        }),
 
         RT_DIST_RELOAD((p, itr) -> {
             if (!RT.INSTANCE.isListen()) throw new IllegalStateException("not running");
