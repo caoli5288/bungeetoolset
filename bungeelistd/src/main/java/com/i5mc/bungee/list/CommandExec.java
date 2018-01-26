@@ -6,9 +6,11 @@ import lombok.val;
 import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
@@ -31,9 +33,12 @@ public class CommandExec extends Command {
                 if (!pattern.matcher(id).matches()) {
                     return;
                 }
-                p.sendMessage("- id: " + id);
-                p.sendMessage("  value: " + $.join(info.getPlayers(), i -> i.getName(), ", "));
-                p.sendMessage("  ip: " + info.getAddress());
+                p.sendMessage("- id: " + id + info.getAddress());
+                Collection<ProxiedPlayer> all = info.getPlayers();
+                if (!all.isEmpty()) {
+                    p.sendMessage("  p: " + all.size());
+                    p.sendMessage("  p_list: " + $.join(all, i -> i.getName(), ", "));
+                }
             });
         }),
 
