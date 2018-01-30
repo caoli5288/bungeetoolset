@@ -1,5 +1,9 @@
-package com.mengcraft.lobbybalancer;
+package com.mengcraft.lobbybalancer.command;
 
+import com.mengcraft.lobbybalancer.$;
+import com.mengcraft.lobbybalancer.InfoMgr;
+import com.mengcraft.lobbybalancer.Zone;
+import com.mengcraft.lobbybalancer.ZoneMgr;
 import lombok.val;
 import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.UserConnection;
@@ -37,7 +41,7 @@ public class BalanceCommand extends Command {
         }
     }
 
-    private void process(UserConnection p, String target) {
+    static void process(UserConnection p, String target) {
         Zone zone = ZoneMgr.select($.nil(target) ? p.getServer().getInfo().getName() : target);
         if (!$.nil(zone)) {
             Queue<String> alive = zone.alive();

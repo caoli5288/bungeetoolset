@@ -1,16 +1,11 @@
 package com.mengcraft.lobbybalancer;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import lombok.SneakyThrows;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.config.ServerInfo;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
@@ -18,15 +13,9 @@ import java.util.regex.Pattern;
  */
 public enum ZoneMgr {
 
-    INST;
+    INSTANCE;
 
     private final Map<String, Zone> mapping = new ConcurrentHashMap<>();
-
-    private final Cache<String, Zone> query = CacheBuilder.newBuilder()
-            .expireAfterAccess(1, TimeUnit.HOURS)
-            .build();
-
-    private final List<Pattern> all = new ArrayList<>();
 
     @SneakyThrows
     public static Zone select(ServerInfo info) {
@@ -35,35 +24,37 @@ public enum ZoneMgr {
 
     @SneakyThrows
     public static Zone select(String name) {
-        return INST.query.get(name, () -> {
-            for (Pattern p : INST.all) {
-                if (p.matcher(name).matches()) {
-                    return INST.mapping.computeIfAbsent(p.pattern(), pt -> Zone.build(p));
-                }
+        return L2Pool.load("zone:" + name, () -> {
+            for (Zone zone : INSTANCE.mapping.values()) {
+                Pattern pattern = zone.getPattern();
+                if (pattern.matcher(name).matches()) return zone;
             }
-            return Zone.NIL;
+            return null;
         });
     }
 
     @SneakyThrows
     public void updateAll(CommandSender who) {
-        for (Pattern p : all) {
-            mapping.compute(p.pattern(), (key, value) -> {
-                if ($.nil(value)) {
-                    return Zone.build(p);
-                }
-                return value.update();
-            });
+        for (Zone zone : INSTANCE.mapping.values()) {
+            zone.update();
         }
         if (!(who == null)) who.sendMessage("Okay");
     }
 
     public void add(Pattern pattern) {
-        all.add(pattern);
+        INSTANCE.mapping.put(pattern.pattern(), Zone.build(pattern));
     }
 
     public void sendAll(CommandSender who) {
-        who.sendMessage(String.valueOf(mapping));
+        mapping.forEach((__, zone) -> {
+            zone.getAll().forEach((id, info) -> {
+                who.sendMessage("- id: " + id + info.getServerInfo().getAddress());
+                int value = info.getValue();
+                if (!(value == 0)) {
+                    who.sendMessage("  priority: " + value);
+                }
+            });
+        });
     }
 
     public void sendHead(CommandSender who) {

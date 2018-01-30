@@ -3,18 +3,22 @@ package com.mengcraft.lobbybalancer;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.val;
+import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.config.ServerInfo;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by on 10-11.
  */
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 @Data
 @EqualsAndHashCode(of = "serverInfo")
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class Info implements Comparable<Info> {
 
     private final ServerInfo serverInfo;
@@ -23,32 +27,67 @@ public class Info implements Comparable<Info> {
     @Setter(value = AccessLevel.NONE)
     private long updateTime;
 
+    private transient ScheduledTask later;
+
     @Override
-    public int compareTo(@NonNull Info other) {
-        return value - other.value;
+    public int compareTo(@NotNull Info ele) {
+        if ($.isUseUpdater()) {
+            return value - ele.value;
+        }
+        return serverInfo.getPlayers().size() - ele.serverInfo.getPlayers().size();
+    }
+
+    public int getValue() {
+        if ($.isUseUpdater()) {
+            return value;
+        }
+        return serverInfo.getPlayers().size();
     }
 
     public int incValue() {
-        return ++value;
+        if ($.isUseUpdater()) {
+            return ++value;
+        }
+        return serverInfo.getPlayers().size();
     }
 
-    public boolean outdated() {
-        return $.now() - updateTime > 60000;
+    public int decValue() {
+        if ($.isUseUpdater()) {
+            return --value;
+        }
+        return serverInfo.getPlayers().size();
     }
 
     public void update(Zone zone) {
-        value = Integer.MAX_VALUE;
+        if (!$.nil(zone)) zone.put(this);
+
+        if (!$.isUseUpdater() || $.now() - updateTime < 60000) {
+            return;
+        }
+
         updateTime = $.now();
+        value = Integer.MAX_VALUE;
+
         serverInfo.ping((result, err) -> {
-            if (err == null) {
+            if ($.nil(err)) {
                 val i = result.getPlayers();
                 value = i.getOnline() - i.getMax();
+            } else {
+                updateLater();
             }
-            if (!$.nil(zone)) zone.queue(this);
         });
     }
 
-    static Info bind(ServerInfo info) {
-        return new Info(info);
+    public void updateLater() {
+        if (!$.isUseUpdater()) {
+            return;
+        }
+
+        if (!$.nil(later)) {
+            later.cancel();
+        }
+
+        later = BungeeCord.getInstance().getScheduler().schedule($.getPlugin(), () -> update(null), 15, TimeUnit.SECONDS);
     }
+
 }

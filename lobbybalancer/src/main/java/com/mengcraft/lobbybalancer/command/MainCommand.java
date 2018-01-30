@@ -1,5 +1,6 @@
-package com.mengcraft.lobbybalancer;
+package com.mengcraft.lobbybalancer.command;
 
+import com.mengcraft.lobbybalancer.ZoneMgr;
 import lombok.val;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
@@ -17,9 +18,9 @@ public class MainCommand extends Command {
 
     enum Sub {
 
-        HEAD(ZoneMgr.INST::sendHead),
-        F5(ZoneMgr.INST::updateAll),
-        ZONE_REF(ZoneMgr.INST::sendAll);
+        HEAD(ZoneMgr.INSTANCE::sendHead),
+        F5(ZoneMgr.INSTANCE::updateAll),
+        ZONE_REF(ZoneMgr.INSTANCE::sendAll);
 
         final Consumer<CommandSender> func;
 
@@ -34,7 +35,7 @@ public class MainCommand extends Command {
 
     @Override
     public void execute(CommandSender who, String[] input) {
-        if (input.length == 1) {
+        if (input.length == 1 && !input[0].isEmpty()) {
             try {
                 Sub.valueOf(input[0].replace('-', '_').toUpperCase()).apply(who);
             } catch (IllegalArgumentException ign) {

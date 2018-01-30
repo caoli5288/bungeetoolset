@@ -1,6 +1,7 @@
 package com.mengcraft.lobbybalancer;
 
 import net.md_5.bungee.api.config.ServerInfo;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,24 +11,29 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public enum InfoMgr {
 
-    INST;
+    INSTANCE;
 
     private final Map<String, Info> mapping = new ConcurrentHashMap<>();
 
-    public static Info mapping(ServerInfo serverInfo) {
-        return INST.mapping.compute(serverInfo.getName(), (key, old) -> {
-            if (old == null || !old.getServerInfo().equals(serverInfo)) {
-                return Info.bind(serverInfo);
+    public static Info select(ServerInfo serverInfo) {
+        Info info = INSTANCE.mapping.get(serverInfo.getName());
+        if (info == null) {
+            INSTANCE.mapping.put(serverInfo.getName(), info = new Info(serverInfo));
+        } else if (!info.getServerInfo().equals(serverInfo)) {
+            ScheduledTask later = info.getLater();
+            if (!$.nil(later)) {
+                later.cancel();
             }
-            return old;
-        });
+            INSTANCE.mapping.put(serverInfo.getName(), info = new Info(serverInfo));
+        }
+        return info;
     }
 
     public static Info getByName(String name) {
-        return INST.mapping.get(name);
+        return INSTANCE.mapping.get(name);
     }
 
-    public static boolean check(ServerInfo serverInfo) {
-        return INST.mapping.containsKey(serverInfo.getName());
+    public static boolean mapped(ServerInfo serverInfo) {
+        return INSTANCE.mapping.containsKey(serverInfo.getName());
     }
 }

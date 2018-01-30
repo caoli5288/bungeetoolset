@@ -1,5 +1,9 @@
 {
   "pattern": [
     "lobby-\\w+"
-  ]
+  ],
+  "mapping": {
+    "lobby": "lobby-1"
+  },
+  "multi_bungee": false
 }
