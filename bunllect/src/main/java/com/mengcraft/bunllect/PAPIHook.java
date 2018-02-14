@@ -37,6 +37,8 @@ public class PAPIHook extends EZPlaceholderHook {
             return "无数据";
         }),
 
+        FIRST((p, itr) -> "" + TimePool.first(p)),
+
         TIME((p, itr) -> {
             EntityTotal total = TimePool.INSTANCE.get(p).getLeft();
             return String.valueOf(total.getLife() + ChronoUnit.SECONDS.between(total.getLatestJoin().toInstant(), Instant.now()));

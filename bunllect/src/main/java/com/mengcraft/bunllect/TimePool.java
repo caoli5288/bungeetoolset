@@ -53,6 +53,17 @@ public enum TimePool {
             " `name` = ?" +
             ";";
 
+    private final String first = "SELECT" +
+            " `time` " +
+            "FROM" +
+            " `bunllect` " +
+            "WHERE" +
+            " `name` = ? " +
+            "ORDER BY" +
+            " `time` " +
+            "LIMIT" +
+            " 1;";
+
     public Future<Pair<EntityTotal, DateValidObject<Integer>>> look(Player p) {
         return pool.computeIfAbsent(p.getUniqueId(), id -> CompletableFuture.supplyAsync(() -> {
             EntityTotal t = new EntityTotal();
@@ -92,6 +103,20 @@ public enum TimePool {
             }
             return new Pair<>(t, new DateValidObject<>(-1));
         }));
+    }
+
+    @SneakyThrows
+    public static long first(Player p) {
+        try (val statement = MyPlugin.conn.getConnection().prepareStatement(INSTANCE.first)) {
+            statement.setString(1, p.getName());
+            try (val result = statement.executeQuery()) {
+                if (result.next()) {
+                    Timestamp time = result.getTimestamp("time");
+                    return (time.getTime() / 1000);
+                }
+            }
+        }
+        return -1;
     }
 
     @SneakyThrows
