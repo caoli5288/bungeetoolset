@@ -48,7 +48,7 @@ public class Executor implements Listener {
         if (life > 0 && p.getServer() != null) {
             String ip = p.getAddress().getAddress().getHostAddress();
             InitialHandler h = (InitialHandler) p.getPendingConnection();
-            ChannelWrapper wrapper = RefHelper.getField(h, "ch");
+            ChannelWrapper wrapper = RefHelper.getField(h, InitialHandler.class == h.getClass() ? "ch" : "channel");
             Channel ch = RefHelper.getField(wrapper, "ch");
             EntityQueue.QUEUE.offer(new Entity(
                     who,
