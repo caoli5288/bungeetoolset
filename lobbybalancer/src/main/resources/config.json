@@ -3,7 +3,8 @@
     "lobby-\\w+"
   ],
   "mapping": {
-    "lobby": "lobby-1"
+    "lobby": "lobby-1",
+    "hub": "lobby-1"
   },
-  "multi_bungee": false
+  "multi_bungee": true
 }

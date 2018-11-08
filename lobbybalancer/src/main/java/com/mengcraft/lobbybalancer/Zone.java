@@ -42,10 +42,8 @@ public class Zone {
     }
 
     public Queue<String> alive() {
-        PriorityQueue<Info> queue = new PriorityQueue<>(all.values());
-        LinkedList<String> output = new LinkedList<>();
-        while (!queue.isEmpty()) {
-            Info info = queue.poll();
+        Queue<String> output = new PriorityQueue<>(all.size());
+        for (Info info : all.values()) {
             if (!(info.getValue() == Integer.MAX_VALUE)) {
                 output.add(info.getServerInfo().getName());
             }
