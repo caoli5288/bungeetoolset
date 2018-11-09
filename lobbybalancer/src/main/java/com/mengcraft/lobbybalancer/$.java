@@ -16,6 +16,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.regex.Pattern;
 
@@ -46,7 +47,7 @@ public class $ extends Plugin {
             Files.copy(getResourceAsStream("config.json"), conf.toPath());
         }
 
-        JsonElement element = new JsonParser().parse(new InputStreamReader(new FileInputStream(conf), "UTF-8"));
+        JsonElement element = new JsonParser().parse(new InputStreamReader(new FileInputStream(conf), StandardCharsets.UTF_8));
         for (JsonElement l : ((JsonObject) element).getAsJsonArray("pattern")) {
             ZoneMgr.INSTANCE.add(Pattern.compile(l.getAsString()));
         }
@@ -54,7 +55,7 @@ public class $ extends Plugin {
         getProxy().getScheduler().runAsync(this, () -> ZoneMgr.INSTANCE.updateAll(null));
 
         for (val mapping : ((JsonObject) element).getAsJsonObject("mapping").entrySet()) {
-            getProxy().getPluginManager().registerCommand(this, new MappingCommand(mapping.getKey(), mapping.getValue().getAsString()));
+            getProxy().getPluginManager().registerCommand(this, new MappingCommand(mapping.getKey(), mapping.getValue().getAsJsonArray()));
         }
 
         useUpdater = ((JsonObject) element).get("multi_bungee").getAsBoolean();
