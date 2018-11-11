@@ -53,9 +53,9 @@ public class Zone {
     }
 
     public void update() {
-        Map<String, ServerInfo> all = BungeeCord.getInstance().getServers();
-        synchronized (all) {
-            all.forEach((key, value) -> {
+        Map<String, ServerInfo> servers = BungeeCord.getInstance().getServers();
+        synchronized (servers) {
+            servers.forEach((key, value) -> {
                 if (!pattern.matcher(key).matches()) {
                     return;
                 }

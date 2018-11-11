@@ -22,6 +22,14 @@ public enum ZoneMgr {
         return select(info.getName());
     }
 
+    public static void register(Zone zone, ServerInfo info) {
+        String cacheKey = "zone:" + info.getName();
+        Map<String, Object> map = L2Pool.map();
+        if (!map.containsKey(cacheKey)) {
+            map.put(cacheKey, zone);
+        }
+    }
+
     @SneakyThrows
     public static Zone select(String name) {
         return L2Pool.load("zone:" + name, () -> {

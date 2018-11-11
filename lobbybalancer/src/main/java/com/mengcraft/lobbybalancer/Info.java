@@ -59,7 +59,10 @@ public class Info implements Comparable<Info> {
     }
 
     public void update(Zone zone) {
-        if (!$.nil(zone)) zone.put(this);
+        if (!$.nil(zone)) {
+            zone.put(this);
+            ZoneMgr.register(zone, serverInfo);
+        }
 
         if (!$.isUseUpdater() || $.now() - updateTime < 60000) {
             return;

@@ -5,6 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import lombok.SneakyThrows;
 import lombok.val;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -25,6 +26,10 @@ public enum L2Pool {
             return l == null ? INSTANCE.invalid : l;
         });
         return out == INSTANCE.invalid ? null : (T) out;
+    }
+
+    public static Map<String, Object> map() {
+        return INSTANCE.pool.asMap();
     }
 
 }
