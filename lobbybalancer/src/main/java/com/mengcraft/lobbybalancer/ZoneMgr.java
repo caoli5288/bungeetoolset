@@ -22,12 +22,13 @@ public enum ZoneMgr {
         return select(info.getName());
     }
 
-    public static void register(Zone zone, ServerInfo info) {
-        String cacheKey = "zone:" + info.getName();
+    public static void register(Zone zone, Info info) {
+        String cacheKey = "zone:" + info.getServerInfo().getName();
         Map<String, Object> map = L2Pool.map();
         if (!map.containsKey(cacheKey)) {
             map.put(cacheKey, zone);
         }
+        zone.put(info);
     }
 
     @SneakyThrows
@@ -54,15 +55,14 @@ public enum ZoneMgr {
     }
 
     public void sendAll(CommandSender who) {
-        mapping.forEach((__, zone) -> {
-            zone.getAll().forEach((id, info) -> {
-                who.sendMessage("- id: " + id + info.getServerInfo().getAddress());
+        for (Zone zone : mapping.values()) {
+            for (Info info : zone.getAll().values()) {
+                who.sendMessage("- id: " + info.getServerInfo().getName() + info.getServerInfo().getAddress());
                 int value = info.getValue();
-                if (!(value == 0)) {
-                    who.sendMessage("  priority: " + value);
-                }
-            });
-        });
+                who.sendMessage("  priority: " + value);
+            }
+            who.sendMessage("# zone " + zone.getPattern().pattern() + " " + zone.alive().size() + " alive servers");
+        }
     }
 
     public void sendHead(CommandSender who) {

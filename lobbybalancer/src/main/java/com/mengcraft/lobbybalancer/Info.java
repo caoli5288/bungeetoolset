@@ -3,13 +3,13 @@ package com.mengcraft.lobbybalancer;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.val;
 import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.TimeUnit;
 
@@ -30,7 +30,7 @@ public class Info implements Comparable<Info> {
     private transient ScheduledTask later;
 
     @Override
-    public int compareTo(@NotNull Info ele) {
+    public int compareTo(@NonNull Info ele) {
         if ($.isUseUpdater()) {
             return value - ele.value;
         }
@@ -60,11 +60,14 @@ public class Info implements Comparable<Info> {
 
     public void update(Zone zone) {
         if (!$.nil(zone)) {
-            zone.put(this);
-            ZoneMgr.register(zone, serverInfo);
+            ZoneMgr.register(zone, this);
         }
 
-        if (!$.isUseUpdater() || $.now() - updateTime < 60000) {
+        if (!$.isUseUpdater()) {
+            return;
+        }
+
+        if ($.now() - updateTime < 60000 && value != Integer.MAX_VALUE) {// Always ping if previous failure.
             return;
         }
 
