@@ -67,7 +67,10 @@ public enum ZoneMgr {
 
     public void sendHead(CommandSender who) {
         for (Zone zone : mapping.values()) {
-            who.sendMessage("Zone(pattern=\"" + zone.getPattern() + "\", head=\"" + zone.alive().peek() + "\")");
+            Info info = InfoMgr.getByName(zone.alive().peek());
+            who.sendMessage("- id: " + info.getServerInfo().getName() + info.getServerInfo().getAddress());
+            int value = info.getValue();
+            who.sendMessage("  priority: " + value);
         }
     }
 
