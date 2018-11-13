@@ -20,7 +20,7 @@ public enum InfoMgr {
         if (info == null) {
             INSTANCE.mapping.put(serverInfo.getName(), info = new Info(serverInfo));
         } else if (!info.getServerInfo().equals(serverInfo)) {
-            ScheduledTask later = info.getLater();
+            ScheduledTask later = info.getScheduledUpdate();
             if (!$.nil(later)) {
                 later.cancel();
             }

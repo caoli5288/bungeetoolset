@@ -34,7 +34,7 @@ public class Zone {
     public void remove(String name) {
         Info removal = all.remove(name);
         if (!$.nil(removal)) {
-            ScheduledTask later = removal.getLater();
+            ScheduledTask later = removal.getScheduledUpdate();
             if (!$.nil(later)) {
                 later.cancel();
             }
@@ -45,7 +45,9 @@ public class Zone {
         PriorityQueue<Info> queue = new PriorityQueue<>(all.values());
         LinkedList<String> output = new LinkedList<>();
         for (Info info : queue) {
-            if (!(info.getValue() == Integer.MAX_VALUE)) {
+            if (info.getValue() == Integer.MAX_VALUE) {
+                info.updateLater(this);
+            } else {
                 output.add(info.getServerInfo().getName());
             }
         }

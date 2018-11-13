@@ -8,11 +8,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.val;
 import net.md_5.bungee.BungeeCord;
-import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 /**
  * Created by on 10-11.
@@ -22,13 +22,14 @@ import java.util.concurrent.TimeUnit;
 @EqualsAndHashCode(of = "serverInfo")
 public class Info implements Comparable<Info> {
 
+    private static final AtomicIntegerFieldUpdater<Info> VALUE_UPDATE = AtomicIntegerFieldUpdater.newUpdater(Info.class, "value");
     private final ServerInfo serverInfo;
-    private int value;
+    volatile int value;
 
     @Setter(value = AccessLevel.NONE)
     private long updateTime;
 
-    private transient ScheduledTask later;
+    private volatile ScheduledTask scheduledUpdate;
 
     @Override
     public int compareTo(@NonNull Info ele) {
@@ -47,19 +48,21 @@ public class Info implements Comparable<Info> {
 
     public int incValue() {
         if ($.isUseUpdater()) {
-            return ++value;
+            return VALUE_UPDATE.incrementAndGet(this);
         }
         return serverInfo.getPlayers().size();
     }
 
     public int decValue() {
         if ($.isUseUpdater()) {
-            return --value;
+            return VALUE_UPDATE.decrementAndGet(this);
         }
         return serverInfo.getPlayers().size();
     }
 
     public void update(Zone zone) {
+        scheduledUpdate = null;
+
         if (!$.nil(zone)) {
             ZoneMgr.register(zone, this);
         }
@@ -80,21 +83,17 @@ public class Info implements Comparable<Info> {
                 val i = result.getPlayers();
                 value = i.getOnline() - i.getMax();
             } else {
-                updateLater();
+                updateLater(zone);
             }
         });
     }
 
-    public void updateLater() {
-        if (!$.isUseUpdater()) {
+    public void updateLater(Zone zone) {
+        if (!$.isUseUpdater() || scheduledUpdate != null) {
             return;
         }
 
-        if (!$.nil(later)) {
-            later.cancel();
-        }
-
-        later = BungeeCord.getInstance().getScheduler().schedule($.getPlugin(), () -> update(null), 15, TimeUnit.SECONDS);
+        scheduledUpdate = BungeeCord.getInstance().getScheduler().schedule($.getPlugin(), () -> update(zone), 15, TimeUnit.SECONDS);
     }
 
 }
