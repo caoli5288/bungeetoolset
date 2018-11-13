@@ -43,15 +43,16 @@ public class Zone {
 
     public Queue<String> alive() {
         PriorityQueue<Info> queue = new PriorityQueue<>(all.values());
-        LinkedList<String> output = new LinkedList<>();
-        for (Info info : queue) {
+        LinkedList<String> answer = new LinkedList<>();
+        while (!queue.isEmpty() && answer.size() != 5) {
+            Info info = queue.remove();
             if (info.getValue() == Integer.MAX_VALUE) {
                 info.updateLater(this);
             } else {
-                output.add(info.getServerInfo().getName());
+                answer.add(info.getServerInfo().getName());
             }
         }
-        return output;
+        return answer;
     }
 
     public void update() {
