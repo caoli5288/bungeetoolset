@@ -34,6 +34,9 @@ public class $ extends Plugin {
     @Getter
     private static boolean useUpdater;
 
+    @Getter
+    private static int balanceQueue = 5;
+
     @Override
     @SneakyThrows
     public void onEnable() {
@@ -59,6 +62,7 @@ public class $ extends Plugin {
         }
 
         useUpdater = ((JsonObject) element).get("multi_bungee").getAsBoolean();
+        balanceQueue = ((JsonObject) element).get("transfer_queue").getAsInt();
 
         Plugin depend = getProxy().getPluginManager().getPlugin("bungeelistd");
         if (!$.nil(depend)) {

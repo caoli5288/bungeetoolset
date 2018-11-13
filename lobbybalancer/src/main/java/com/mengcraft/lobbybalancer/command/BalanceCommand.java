@@ -44,7 +44,7 @@ public class BalanceCommand extends Command {
     static void process(UserConnection p, String target) {
         Zone zone = ZoneMgr.select($.nil(target) ? p.getServer().getInfo().getName() : target);
         if (!$.nil(zone)) {
-            Queue<String> alive = zone.alive();
+            Queue<String> alive = zone.alive($.getBalanceQueue());
             String head = alive.peek();
             if (!$.nil(head)) {
                 ServerInfo info = InfoMgr.getByName(head).getServerInfo();

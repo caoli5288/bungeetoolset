@@ -61,13 +61,13 @@ public enum ZoneMgr {
                 int value = info.getValue();
                 who.sendMessage("  priority: " + value);
             }
-            who.sendMessage("# zone " + zone.getPattern().pattern() + " " + zone.alive().size() + " alive servers");
+            who.sendMessage("# zone " + zone.getPattern().pattern() + " " + zone.alive(-1).size() + " alive servers");
         }
     }
 
     public void sendHead(CommandSender who) {
         for (Zone zone : mapping.values()) {
-            Info info = InfoMgr.getByName(zone.alive().peek());
+            Info info = InfoMgr.getByName(zone.alive(1).peek());
             who.sendMessage("- id: " + info.getServerInfo().getName() + info.getServerInfo().getAddress());
             int value = info.getValue();
             who.sendMessage("  priority: " + value);

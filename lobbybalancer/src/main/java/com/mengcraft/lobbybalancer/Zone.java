@@ -41,10 +41,10 @@ public class Zone {
         }
     }
 
-    public Queue<String> alive() {
+    public Queue<String> alive(int limit) {
         PriorityQueue<Info> queue = new PriorityQueue<>(all.values());
         LinkedList<String> answer = new LinkedList<>();
-        while (!queue.isEmpty() && answer.size() != 5) {
+        while (!queue.isEmpty() && answer.size() != limit) {
             Info info = queue.remove();
             if (info.getValue() == Integer.MAX_VALUE) {
                 info.updateLater(this);

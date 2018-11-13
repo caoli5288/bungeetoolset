@@ -6,5 +6,6 @@
     "lobby": ["lobby-","1"],
     "hub": ["lobby-","1"]
   },
-  "multi_bungee": true
+  "multi_bungee": true,
+  "transfer_queue": 5
 }

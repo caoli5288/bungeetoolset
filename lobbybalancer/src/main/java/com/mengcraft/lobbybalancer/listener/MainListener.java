@@ -43,7 +43,7 @@ public class MainListener implements Listener {
         }
 
         UserConnection p = ((UserConnection) event.getPlayer());
-        Queue<String> alive = zone.alive();
+        Queue<String> alive = zone.alive($.getBalanceQueue());
         String target = alive.peek();
 
         if (!nil(target)) {
