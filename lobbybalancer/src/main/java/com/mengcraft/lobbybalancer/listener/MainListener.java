@@ -7,6 +7,7 @@ import com.mengcraft.lobbybalancer.Monad;
 import com.mengcraft.lobbybalancer.Zone;
 import com.mengcraft.lobbybalancer.ZoneMgr;
 import net.md_5.bungee.BungeeCord;
+import net.md_5.bungee.ServerConnection;
 import net.md_5.bungee.UserConnection;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.Server;
@@ -44,7 +45,7 @@ public class MainListener implements Listener {
         }
 
         UserConnection p = ((UserConnection) event.getPlayer());
-        Queue<String> alive = zone.alive($.getBalanceQueue(), Monad.obj(p.getServer()).get(srv -> srv.getInfo().getName()).value());
+        Queue<String> alive = zone.alive($.getBalanceQueue(), Monad.obj(p.getServer()).get(ServerConnection::getInfo).get(ServerInfo::getName).getObj());
         String target = alive.peek();
 
         if (!nil(target)) {

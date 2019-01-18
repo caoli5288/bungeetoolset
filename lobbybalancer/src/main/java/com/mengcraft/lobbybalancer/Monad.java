@@ -14,13 +14,17 @@ public class Monad<T> {
     }
 
     public <R> Monad<R> get(Function<T, R> functor) {
+        return obj(getObj(functor));
+    }
+
+    public <R> R getObj(Function<T, R> functor) {
         if (obj != null) {
-            return obj(functor.apply(obj));
+            return functor.apply(obj);
         }
         return null;
     }
 
-    public T value() {
+    public T getObj() {
         return obj;
     }
 
