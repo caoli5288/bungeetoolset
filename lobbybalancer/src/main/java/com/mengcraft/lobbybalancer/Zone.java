@@ -41,15 +41,18 @@ public class Zone {
         }
     }
 
-    public Queue<String> alive(int limit) {
-        PriorityQueue<Info> queue = new PriorityQueue<>(all.values());
+    public Queue<String> alive(int limit, String exclusive) {
+        PriorityQueue<Info> sorted = new PriorityQueue<>(all.values());
         LinkedList<String> answer = new LinkedList<>();
-        while (!queue.isEmpty() && answer.size() != limit) {
-            Info info = queue.remove();
+        while (!sorted.isEmpty() && answer.size() != limit) {
+            Info info = sorted.remove();
             if (info.getValue() == Integer.MAX_VALUE) {
                 info.updateLater(this);
             } else {
-                answer.add(info.getServerInfo().getName());
+                String name = info.getServerInfo().getName();
+                if (!name.equals(exclusive)) {
+                    answer.add(name);
+                }
             }
         }
         return answer;

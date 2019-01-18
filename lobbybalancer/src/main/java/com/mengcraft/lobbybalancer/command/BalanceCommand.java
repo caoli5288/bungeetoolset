@@ -2,6 +2,7 @@ package com.mengcraft.lobbybalancer.command;
 
 import com.mengcraft.lobbybalancer.$;
 import com.mengcraft.lobbybalancer.InfoMgr;
+import com.mengcraft.lobbybalancer.Monad;
 import com.mengcraft.lobbybalancer.Zone;
 import com.mengcraft.lobbybalancer.ZoneMgr;
 import lombok.val;
@@ -44,7 +45,7 @@ public class BalanceCommand extends Command {
     static void process(UserConnection p, String target) {
         Zone zone = ZoneMgr.select($.nil(target) ? p.getServer().getInfo().getName() : target);
         if (!$.nil(zone)) {
-            Queue<String> alive = zone.alive($.getBalanceQueue());
+            Queue<String> alive = zone.alive($.getBalanceQueue(), Monad.obj(p.getServer()).get(srv -> srv.getInfo().getName()).value());
             String head = alive.peek();
             if (!$.nil(head)) {
                 ServerInfo info = InfoMgr.getByName(head).getServerInfo();
