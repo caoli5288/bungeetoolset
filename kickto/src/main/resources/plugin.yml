@@ -1,0 +1,4 @@
+name: KickTo
+main: com.mengcraft.bungeetoolset.kickto.KickTo
+version: ${project.version}
+author: caoli5288

@@ -14,6 +14,7 @@
         <module>slashlimit</module>
         <module>i5channel</module>
         <module>lobbybalancer</module>
+        <module>kickto</module>
     </modules>
     <packaging>pom</packaging>
 
